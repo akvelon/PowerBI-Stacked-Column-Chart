@@ -1,0 +1,72 @@
+@import (less) "node_modules/powerbi-visuals-utils-interactivityutils/lib/index.css";
+@import (less) "node_modules/powerbi-visuals-utils-chartutils/lib/index.css";
+@import (less) "node_modules/powerbi-visuals-utils-formattingutils/lib/index.css";
+@chartColor: #777777;
+
+.bar-chart-svg {
+    position: absolute;
+}
+
+p {
+    font-size: 20px;
+    font-weight: bold;
+    em {
+        background: yellow;
+        padding: 5px;
+        
+    }
+}
+
+path.domain {
+    display: none;
+    fill: none;
+}
+
+.tick {
+    font-size: 11px;
+    fill: @chartColor;
+
+    line {
+        stroke: #e9e9e9;
+    }
+}
+
+
+//
+.scrollbar-track {
+    position: absolute;
+    background: #ccc;
+    cursor: default;
+    display: none;
+}
+.scrollbar-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: #666;
+    border: 0;
+    outline: 0;
+    box-sizing: border-box;
+    padding: 0;
+    &:hover {
+        background: #333;
+    }
+    &:active {
+        background: #000;
+    }
+}
+
+
+.selection-rect {
+    opacity: 0;
+    border: solid #000 1px;
+    position: absolute;
+    width: 0;
+    height: 0;
+    box-sizing: border-box;
+    background: #555;
+    &.selection-rect-active {
+        opacity: .5;
+    }
+}
