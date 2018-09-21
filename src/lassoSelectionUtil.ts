@@ -246,7 +246,6 @@ module powerbi.extensibility.visual.visualUtils {
                 }
             }
 
-
             this.visual.webBehaviorSelectionHandler.handleSelection(selectedDataPoints, isMultiselect);
         }
 
