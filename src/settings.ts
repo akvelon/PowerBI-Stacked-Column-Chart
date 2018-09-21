@@ -31,6 +31,9 @@ module powerbi.extensibility.visual {
   const DefaultFontFamily: string = "\"Segoe UI\", wf_segoe-ui_normal, helvetica, arial, sans-serif";
 
   export class VisualSettings extends DataViewObjectsParser {
+    public selectionSaveSettings = {
+      selection: []
+    };
     public dataPoint: dataPointSettings = new dataPointSettings();
     public legend: legendSettings = new legendSettings();
     public categoryAxis: categoryAxisSettings = new categoryAxisSettings();

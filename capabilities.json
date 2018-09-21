@@ -43,6 +43,19 @@
         }
     ],
     "objects": {
+        "selectionSaveSettings": {
+            "displayName": "Selection save settigns",
+            "displayNameKey": "Visual_SelectionSaveSettings",
+            "properties": {
+                "selection": {
+                    "displayName": "Selection",
+                    "displayNameKey": "Visual_SelectionSaveSettings_Selection",
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
         "dataPoint": {
             "displayName": "Data colors",
             "properties": {

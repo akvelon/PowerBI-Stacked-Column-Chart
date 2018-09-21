@@ -85,7 +85,7 @@ module powerbi.extensibility.visual.visualUtils {
             this.updateMeasurements();
         }
 
-        updateData(action: ScrollbarState, updateType: VisualUpdateType): void {
+        updateData(action: ScrollbarState, updateType: VisualUpdateType, skipUpdatePosition: boolean): void {
             this.settings.minCategorySpace =  this.visual.getSettings().categoryAxis.minCategoryWidth;
 
             let availableSpace: number = this.visual.viewport.width - this.visual.visualMargin.left - this.visual.visualMargin.right;
@@ -96,7 +96,7 @@ module powerbi.extensibility.visual.visualUtils {
             if ( this.allow && action === ScrollbarState.Enable && this.scrolling.positionsCount > 0 ) {
                 this.enable();
                 const resizeEndCode = 36; // It's incorrect in the VisualUpdateType enum for some reason
-                if ( updateType === VisualUpdateType.Resize || updateType === resizeEndCode ){
+                if (skipUpdatePosition || updateType === VisualUpdateType.Resize || updateType === resizeEndCode) {
                     this.correctScrollingPosition();
                 } else {
                     this.updateScrollingPosition(0);
@@ -121,7 +121,7 @@ module powerbi.extensibility.visual.visualUtils {
         }
 
         getIndexOfFirstVisibleDataPoint(): number {
-            let allDataPoints: VisualDataPoint[] = this.visual.getAllDataPoints();
+            let allDataPoints: VisualDataPoint[] = this.visual.getAllDataPoints().filter(x => !x.highlight);
             let firstVisibleDataPoint: VisualDataPoint = this.visibleDataPoints[0];
 
             for (let i: number = 0; i < allDataPoints.length; i++) {
