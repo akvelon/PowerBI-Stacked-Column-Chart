@@ -39,6 +39,7 @@ module powerbi.extensibility.visual {
     public categoryAxis: categoryAxisSettings = new categoryAxisSettings();
     public valueAxis: valueAxisSettings = new valueAxisSettings();
     public categoryLabels: categoryLabelsSettings = new categoryLabelsSettings();
+    public constantLine: constantLineSettings = new constantLineSettings();
   }
 
   export enum LabelPosition {
@@ -60,6 +61,33 @@ module powerbi.extensibility.visual {
     public fill: string = "#01b8aa";
     // Show all
     public showAllDataPoints: boolean = true;
+  }
+
+  export enum LineStyle {
+    Dashed = <any>"dashed",
+    Solid = <any>"solid",
+    Dotted = <any>"dotted"
+  }
+
+  export enum Position {
+    Behind = <any>"behind",
+    InFront = <any>"front"
+  }
+
+  export enum Text {
+    Name = <any>"name",
+    Value = <any>"value",
+    NameAndValue = <any>"nameAndValue"
+  }
+
+  export enum HorizontalPosition {
+    Left = <any>"left",
+    Right = <any>"right"
+  }
+
+  export enum VerticalPosition {
+    Top = <any>"top",
+    Bottom = <any>"bottom"
   }
 
   // tslint:disable-next-line:class-name
@@ -87,6 +115,10 @@ module powerbi.extensibility.visual {
     public axisType: string = "categorical";
     // Axis Scale type
     public axisScale: string = "linear";
+    // Axis start
+    public start: number = null;
+    // Axis end
+    public end: number = null;
     // Axis color
     public axisColor: string = "";
     // Axis Font Size
@@ -120,6 +152,10 @@ module powerbi.extensibility.visual {
     public position: string = "left";
     // Axis Scale type
     public axisScale: string = "linear";
+    // Axis start
+    public start: number = null;
+    // Axis end
+    public end: number = null;
     // Axis color
     public axisColor: string = "";
     // Axis Font Size
@@ -172,5 +208,22 @@ module powerbi.extensibility.visual {
     public transparency: number = 90;
     // Show Background transparency
     public backgroundColor: string = "";
+  }
+  
+  export class constantLineSettings {
+    public show: boolean = false;
+    public name: string = "";
+    public value: number = 0;
+    public lineColor: string = "#01b8aa";
+    public transparency: number = 90;
+    public lineStyle: LineStyle = LineStyle.Dotted;
+    public position: Position = Position.Behind;
+    public dataLabelShow: boolean = false;    
+    public fontColor: string = "#01b8aa";
+    public text: Text = Text.Name;
+    public horizontalPosition: HorizontalPosition = HorizontalPosition.Left;
+    public verticalPosition: VerticalPosition = VerticalPosition.Top;
+    public displayUnits: number = 0;
+    public precision: number = null;
   }
 }
