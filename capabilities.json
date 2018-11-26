@@ -338,6 +338,22 @@
                         ]
                     }
                 },
+                "start": {
+                    "displayName": "Start",
+                    "displayNameKey": "Visual_Axis_Start",
+                    "placeHolderText": "Auto",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "end": {
+                    "displayName": "End",
+                    "displayNameKey": "Visual_Axis_End",
+                    "placeHolderText": "Auto",
+                    "type": {
+                        "numeric": true
+                    }
+                },
                 "axisColor": {
                     "displayName": "Color",
                     "displayNameKey": "Visual_Axis_Color",
@@ -674,6 +690,22 @@
                                 "displayName": "Right"
                             }
                         ]
+                    }
+                },
+                "start": {
+                    "displayName": "Start",
+                    "displayNameKey": "Visual_Axis_Start",
+                    "placeHolderText": "Auto",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "end": {
+                    "displayName": "End",
+                    "displayNameKey": "Visual_Axis_End",
+                    "placeHolderText": "Auto",
+                    "type": {
+                        "numeric": true
                     }
                 },
                 "axisColor": {
@@ -1025,12 +1057,12 @@
             "properties": {
                 "show": {
                     "displayName": "Show",
-                    "displayNameKey": "Visual_CategoryLabels_Show",
+                    "displayNameKey": "Show",
                     "type": {
                         "bool": true
                     }
                 },
-                "color": {
+                "lineColor": {
                     "displayName": "Color",
                     "displayNameKey": "Visual_CategoryLabels_LabelsFill",
                     "type": {
@@ -1275,6 +1307,172 @@
                                 "color": true
                             }
                         }
+                    }
+                }
+            }
+        },
+        "constantLine": {
+            "displayName": "Constant line",
+            "properties": {
+                "show": {
+                    "displayName": "Show",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "name": {
+                    "displayName": "Name",
+                    "type": {
+                        "text": true
+                    }
+                },
+                "value": {
+                    "displayName": "Value",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "lineColor": {
+                    "displayName": "Color",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "transparency": {
+                    "displayName": "Transparency",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "lineStyle": {
+                    "displayName": "Line style",
+                    "displayNameKey": "Visual_Axis_LineStyle",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "Dashed",
+                                "description": "Dashed",
+                                "value": "dashed"
+                            },
+                            {
+                                "displayName": "Solid",
+                                "description": "Solid",
+                                "value": "solid"
+                            },
+                            {
+                                "displayName": "Dotted",
+                                "description": "Dotted",
+                                "value": "dotted"
+                            }
+                        ]
+                    }
+                },
+                "position": {
+                    "displayName": "Position",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "Behind",
+                                "description": "Behind",
+                                "value": "behind"
+                            },
+                            {
+                                "displayName": "In front",
+                                "description": "In front",
+                                "value": "front"
+                            }
+                        ]
+                    }
+                },
+                "dataLabelShow": {
+                    "displayName": "Data label",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fontColor": {
+                    "displayName": "Color",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "text": {
+                    "displayName": "Text",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "Value",
+                                "description": "Value",
+                                "value": "value"
+                            },
+                            {
+                                "displayName": "Name",
+                                "description": "Name",
+                                "value": "name"
+                            },
+                            {
+                                "displayName": "Name and Value",
+                                "description": "Name and Value",
+                                "value": "nameAndValue"
+                            }
+                        ]
+                    }
+                },
+                "horizontalPosition": {
+                    "displayName": "Horizontal Position",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "Left",
+                                "description": "Left",
+                                "value": "left"
+                            },
+                            {
+                                "displayName": "Right",
+                                "description": "Right",
+                                "value": "right"
+                            }
+                        ]
+                    }
+                },
+                "verticalPosition": {
+                    "displayName": "Vertical Position",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "Top",
+                                "description": "Top",
+                                "value": "top"
+                            },
+                            {
+                                "displayName": "Bottom",
+                                "description": "Bottom",
+                                "value": "bottom"
+                            }
+                        ]
+                    }
+                },
+                "displayUnits": {
+                    "displayName": "Display units",
+                    "type": {
+                        "formatting": {
+                            "labelDisplayUnits": true
+                        }
+                    }
+                },
+                "precision": {
+                    "displayName": "Decimal Places",
+                    "placeHolderText": "Auto",
+                    "type": {
+                        "numeric": true
                     }
                 }
             }

@@ -8,10 +8,13 @@ module powerbi.extensibility.visual {
     import UpdateSelection = d3.selection.Update;
     import dataLabelUtils = powerbi.extensibility.utils.chart.dataLabel.utils;
     import PixelConverter = powerbi.extensibility.utils.type.PixelConverter;
+    import ValueFormatter = powerbi.extensibility.utils.formatting.valueFormatter;
     import IValueFormatter = powerbi.extensibility.utils.formatting.IValueFormatter;
     import translate = powerbi.extensibility.utils.svg.translate;
     import ClassAndSelector = powerbi.extensibility.utils.svg.CssConstants.ClassAndSelector;
     import createClassAndSelector = powerbi.extensibility.utils.svg.CssConstants.createClassAndSelector;
+    import TextProperties = powerbi.extensibility.utils.formatting.TextProperties;    
+    import TextMeasurementService = powerbi.extensibility.utils.formatting.textMeasurementService;
 
     module Selectors {
         export const BarSelect = CssConstants.createClassAndSelector("bar");
@@ -261,6 +264,134 @@ module powerbi.extensibility.visual {
                 },
                 null,
                 true);
+        }
+
+        public static renderConstantLine(settings: constantLineSettings, element: d3.Selection<SVGElement>, axes: IAxes, width: number) {
+            let line: d3.Selection<any> = element.select(".const-line");
+            let y = axes.y.scale(settings.value);
+            let x = axes.x.scale(axes.x.dataDomain[0]);
+
+            if (line[0][0]) {
+                element.selectAll("line").remove();
+            } 
+
+            if (settings.position === Position.InFront) {
+                line = element.append("line");
+            } else {
+                line = element.insert("line", ".bar-group");
+            }
+
+            line
+                .classed("const-line", true)                    
+                .style({
+                    display: settings.show ? "unset" : "none",
+                    stroke: settings.lineColor,
+                    "stroke-opacity": 1 - settings.transparency / 100,
+                    "stroke-width": "3px"
+                })
+                .attr({
+                    "y2": y,
+                    "x2": width,
+                    "y1": y
+                });
+
+            if (settings.lineStyle === LineStyle.Dotted) {
+                line.style({
+                    "stroke-dasharray": "1, 5",
+                    "stroke-linecap": "round"
+                });
+            } else if (settings.lineStyle === LineStyle.Dashed) {
+                line.style({
+                    "stroke-dasharray": "5, 5"
+                });
+            }
+
+            let textProperties: TextProperties = {
+                fontFamily: "wf_standard-font, helvetica, arial, sans-serif;",
+                fontSize: "10px"
+            };            
+
+            let text: string = this.getLineText(settings);
+            let textWidth: number = TextMeasurementService.measureSvgTextWidth(textProperties, text);
+            let textHeight: number = TextMeasurementService.estimateSvgTextHeight(textProperties);
+
+            let label: d3.Selection<any> = element.select(".const-label");
+
+            if (label[0][0]) {
+                element.selectAll("text").remove();
+            }
+
+            if (settings.show && settings.dataLabelShow) {
+                label = element
+                            .append("text")
+                            .classed("const-label", true);
+
+                label
+                    .attr({
+                        transform: this.getTranslateForStaticLineLabel(x, y, textWidth, textHeight, settings, axes, width)
+                    });
+
+                label
+                    .text(text)
+                    .style({
+                        "font-family": "wf_standard-font, helvetica, arial, sans-serif",
+                        "font-size": "10px",
+                        fill: settings.fontColor
+                    });
+            }
+        }
+
+        private static getLineText(settings: constantLineSettings): string {
+            let displayUnits: number = settings.displayUnits;
+            let precision: number = settings.precision;
+
+            let formatter = ValueFormatter.create({
+                value: displayUnits,
+                value2: 0,
+                precision: precision,
+                format: "0"
+            });
+
+            switch(settings.text) {
+                case Text.Name: {
+                    return settings.name;
+                }
+                case Text.Value: {
+                    return formatter.format(settings.value);
+                }
+                case Text.NameAndValue: {
+                    return settings.name + " " + formatter.format(settings.value);
+                }
+            }
+        }
+
+        private static getTranslateForStaticLineLabel(x: number, y: number, textWidth: number, textHeight: number, settings: constantLineSettings, axes: IAxes, width: number) {
+            let positionAlong: number;
+            const marginAlong: number = 8;
+            if (settings.horizontalPosition === HorizontalPosition.Left) {
+                positionAlong = marginAlong;
+            } else {
+                positionAlong = width - textWidth - marginAlong;
+            }
+
+            const marginAcross: number = 5;
+            let positionAcross: number;
+            if (settings.verticalPosition === VerticalPosition.Top) {
+                positionAcross = y - (marginAcross + textHeight);
+            } else {
+                positionAcross = y + (marginAcross + textHeight);
+            }
+
+            let minPosition: number = axes.y.scale(axes.y.dataDomain[1]);
+            let maxPosition: number = axes.y.scale(axes.y.dataDomain[0]);
+
+            if (positionAcross <= minPosition) {
+                positionAcross = minPosition + marginAcross;
+            } else if(positionAcross >= maxPosition) {
+                positionAcross = maxPosition - (textHeight + marginAcross);
+            }
+
+            return translate(positionAlong, positionAcross);
         }
     }
 }

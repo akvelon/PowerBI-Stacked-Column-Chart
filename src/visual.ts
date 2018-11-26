@@ -84,7 +84,7 @@ module powerbi.extensibility.visual {
 
         public scrollBar: visualUtils.ScrollBar = new visualUtils.ScrollBar(this);
 
-        private columnWidth: number = 0; // height for bars, width for columns
+        private dataPointThickness: number = 0; // height for bars, width for columns
 
         public settings: VisualSettings;
         public host: IVisualHost;
@@ -274,7 +274,7 @@ module powerbi.extensibility.visual {
 
             this.calculateVisualSizeAndPosition(this.legendSize);
 
-            this.calculateColumnWidth();
+            this.calculateDataPointThickness();
 
             axes = this.createAxes(visibleDataPoints);
             this.data.size = this.visualSize;
@@ -282,7 +282,7 @@ module powerbi.extensibility.visual {
             this.interactivityService.applySelectionStateToData(this.data.dataPoints);
 
             // calculate again after yScale changing
-            this.calculateColumnWidth();
+            this.calculateDataPointThickness();
 
             // calculate again after columnWidth changing
             axes = this.createAxes(visibleDataPoints);
@@ -394,7 +394,7 @@ module powerbi.extensibility.visual {
             this.calculateOffsets();
             this.calculateVisualSizeAndPosition(this.legendSize);
 
-            this.calculateColumnWidth();
+            this.calculateDataPointThickness();
 
             axes = this.createAxes(visibleDataPoints);
             this.data.size = this.visualSize;
@@ -402,7 +402,7 @@ module powerbi.extensibility.visual {
             this.interactivityService.applySelectionStateToData(this.data.dataPoints);
 
             // calculate again after yScale changing
-            this.calculateColumnWidth();
+            this.calculateDataPointThickness();
 
             // calculate again after columnWidth changing
             axes = this.createAxes(visibleDataPoints);
@@ -436,26 +436,26 @@ module powerbi.extensibility.visual {
                 this.metadata,
                 this.settings,
                 this.host,
-                this.columnWidth,
+                this.dataPointThickness,
                 this.maxXLabelsWidth
             );
 
             return axes;
         }
 
-        private calculateColumnWidth(): void {
-            this.columnWidth = visualUtils.calculateBarHeight(
+        private calculateDataPointThickness(): void {
+            this.dataPointThickness = visualUtils.calculateDataPointThickness(
                 this.data.dataPoints,
                 this.visualSize,
                 this.data.categories,
                 this.settings.categoryAxis.innerPadding,
                 this.data.axes[ScrollableAxisName.X].scale,
-                this.settings.categoryAxis.axisType
+                this.settings
             );
         }
 
         private renderAxes(): void {
-            visualUtils.calculateBarCoordianates(this.data, this.settings, this.columnWidth);
+            visualUtils.calculateBarCoordianates(this.data, this.settings, this.dataPointThickness);
 
             RenderAxes.render(
                 this.settings,
@@ -480,7 +480,7 @@ module powerbi.extensibility.visual {
                 this.axisGraphicsContext,
                 labelMaxHeight);
 
-                visualUtils.calculateBarCoordianates(this.data, this.settings, this.columnWidth);
+                visualUtils.calculateBarCoordianates(this.data, this.settings, this.dataPointThickness);
             // render main visual
             RenderVisual.render(
                 this.data,
@@ -524,6 +524,9 @@ module powerbi.extensibility.visual {
                 this.settings,
                 this.labelGraphicsContext
             );
+
+            let xWidth: number = (<Element>this.yAxisSvgGroup.selectAll("line").node()).getBoundingClientRect().width;
+            RenderVisual.renderConstantLine(this.settings.constantLine, this.visualSvgGroup, this.data.axes, xWidth);
         }
 
         private getLegendSize(settings: legendSettings, legendElementRoot: d3.Selection<SVGElement>): LegendSize {

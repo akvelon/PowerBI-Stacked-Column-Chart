@@ -30,7 +30,7 @@ module powerbi.extensibility.visual {
             metadata: VisualMeasureMetadata,
             settings: VisualSettings,
             host: IVisualHost,
-            columnWidth: number,
+            dataPointThickness: number,
             maxXLabelsWidth = null): IAxes {
 
             let yAxisProperties: axis.IAxisProperties = null;
@@ -60,6 +60,7 @@ module powerbi.extensibility.visual {
                 scaleType: valueAxisScale,
                 useTickIntervalForDisplayUnits: true,
                 axisDisplayUnits: settings.valueAxis.displayUnits,
+                disableNice: settings.valueAxis.start != null || settings.valueAxis.end != null,
                 axisPrecision: yAxisPrecision
             });
 
@@ -97,7 +98,7 @@ module powerbi.extensibility.visual {
             }
 
             let innerPadding: number = settings.categoryAxis.innerPadding / 100;
-            const outerPadding: number = xIsScalar && axisType === "continuous" ? columnWidth / 2 : 0;
+            const outerPadding: number = xIsScalar && axisType === "continuous" ? dataPointThickness / 2 : 0;
 
             let xAxisPrecision: any = settings.categoryAxis && settings.categoryAxis.precision != null && settings.categoryAxis.precision >= 0
                 ? settings.categoryAxis.precision.toString()
@@ -124,6 +125,7 @@ module powerbi.extensibility.visual {
                 useTickIntervalForDisplayUnits: true,
                 axisDisplayUnits: settings.categoryAxis.displayUnits,
                 axisPrecision: xAxisPrecision,
+                disableNice: axisType === "continuous" && (settings.categoryAxis.start != null || settings.categoryAxis.end != null),
                 getValueFn: (index: number, dataType: valueType): any => {
 
                     if (dataType.dateTime && dateColumnFormatter) {
@@ -411,12 +413,25 @@ module powerbi.extensibility.visual {
                 let dataDomainMinX: number = d3.min(visibleDatapoints, d => <number>d.category);
                 let dataDomainMaxX: number = d3.max(visibleDatapoints, d => <number>d.category);
 
-                dataDomainX = [dataDomainMinX, dataDomainMaxX];
+                let start = settings.categoryAxis.start;
+                let end = settings.categoryAxis.end;
+
+                dataDomainX = [start != null ? settings.categoryAxis.start : dataDomainMinX, end != null ? end : dataDomainMaxX];
             }
+
+            let constantLineValue: number = settings.constantLine.value;
+
+            if (constantLineValue || constantLineValue === 0) {
+                dataDomainMinY = dataDomainMinY > constantLineValue ? constantLineValue : dataDomainMinY;
+                dataDomainMaxY = dataDomainMaxY < constantLineValue ? constantLineValue : dataDomainMaxY;
+            }
+
+            let start = settings.valueAxis.start;
+            let end = settings.valueAxis.end;
 
             return {
                 xAxisDomain: dataDomainX,
-                yAxisDomain: [dataDomainMinY, dataDomainMaxY]
+                yAxisDomain: [start != null ? start : dataDomainMinY, end != null ? end : dataDomainMaxY]
             };
         }
     }
