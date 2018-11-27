@@ -156,35 +156,38 @@ module powerbi.extensibility.visual.legendUtils {
         visualLegend: ILegend,
         svg: d3.Selection<SVGElement>,
         viewport: IViewport,
-        layerLegendData: LegendData,
-        legendObjectProperties: DataViewObject,
+        legendProperties: LegendProperties,
         legendElement): void {
-        const legendData: LegendData = {
+        const legendDataForRender: LegendData = {
             title: "",
             dataPoints: []
         };
 
-        legendData.labelColor = legendObjectProperties.legendNameColor as string;
-        legendData.title = legendObjectProperties.titleText as string;
+        let legendObject: DataViewObject = legendProperties.legendObject;
+        let legendData: LegendData = legendProperties.data;
+
+        legendDataForRender.labelColor = legendObject.legendNameColor as string;
+        legendDataForRender.title = legendObject.titleText as string;
 
         const legend: ILegend = visualLegend;
 
-        if (layerLegendData) {
-            legendData.dataPoints = legendData.dataPoints.concat(layerLegendData.dataPoints || []);
+        const fontFamily: string = legendObject.fontFamily.toString() || DefaultFontFamily;
 
-            legendData.fontSize = this.legendLabelFontSize
-                ? this.legendLabelFontSize
-                : LegendLabelFontSizeDefault;
+        if (legendData) {
+            legendDataForRender.dataPoints = legendData.dataPoints ? legendData.dataPoints : [];
 
-            legendData.grouped = !!layerLegendData.grouped;
+            legendDataForRender.fontSize = legendObject.fontSize ? legendObject.fontSize as number : LegendLabelFontSizeDefault;
+
+            // Important: This code is redefining props of chart legend util
+            (legend as any).__proto__.constructor.DefaultTitleFontFamily = (legend as any).__proto__.constructor.DefaultFontFamily = fontFamily;
+
+            legendDataForRender.grouped = !!legendData.grouped;
         }
 
-        const legendProperties: DataViewObject = legendObjectProperties;
-
         if (legendProperties) {
-            legendDataModule.update(legendData, legendProperties);
+            legendDataModule.update(legendDataForRender, legendObject);
 
-            const position: string = legendProperties[legendProps.position] as string;
+            const position: string = legendProperties.legendObject[legendProps.position] as string;
 
             if (position) {
                 legend.changeOrientation(LegendPosition[position]);
@@ -194,45 +197,16 @@ module powerbi.extensibility.visual.legendUtils {
             legend.changeOrientation(LegendPosition.Top);
         }
 
-        if (legendData.dataPoints.length === MinAmountOfDataPointsInTheLegend
-            && !legendData.grouped) {
-            // legendData.dataPoints = [];
-        }
+        // Important: This code is overriding styles of chart legend util
+        const legendGroup = d3.select('#legendGroup').node() as HTMLElement;
+        legendGroup.style.fontFamily = fontFamily;
 
-        legend.drawLegend(legendData, {
+        legend.drawLegend(legendDataForRender, {
             height: viewport.height,
             width: viewport.width
         });
 
         legendModule.positionChartArea(svg, legend);
-
-        let legendItems: Array<any> = [].slice.call(legendElement[0][0].children ? legendElement[0][0].children : legendElement[0][0].childNodes);
-
-        legendItems = legendItems.filter(item => (item.classList.value === "legendItem" || item.classList.value === "legendTitle"));
-
-        if (legendItems && legendItems.length > 0) {
-            let offset: number = 0;
-
-            legendItems.forEach((item, i, arr) => {
-                item.style.fontFamily = DefaultFontFamily;
-                let oldWidth = item.getBoundingClientRect().width;
-                item.style.fontFamily = <string>legendObjectProperties.fontFamily || DefaultFontFamily;
-                let newWidth = item.getBoundingClientRect().width;
-
-                let orientation = legend.getOrientation();
-
-                if (orientation === LegendPosition.Right ||
-                    orientation === LegendPosition.RightCenter ||
-                    orientation === LegendPosition.Left ||
-                    orientation === LegendPosition.LeftCenter) {
-                    item.style.transform = `translateX(${0}px)`;
-                    // TODO: add processing for left right position
-                } else {
-                    item.style.transform = `translateX(${offset}px)`;
-                }
-                offset += newWidth - oldWidth;
-            });
-        }
     }
 
 
@@ -252,6 +226,19 @@ module powerbi.extensibility.visual.legendUtils {
         };
 
         return dataViewObject;
+    }
+
+    export function setLegendProperties(dataView: DataView, host: IVisualHost, settings: legendSettings): LegendProperties {
+        let legendObject: DataViewObject = legendUtils.getLegendProperties(settings);
+        let legendData = legendUtils.getSuitableLegendData(dataView, host, settings);
+        const legendIsRendered = legendData === undefined ? false : legendData.dataPoints.length > 0;
+        const legendColors = legendIsRendered ? legendUtils.getLegendColors(legendData.dataPoints) : [];
+
+        return {
+            legendObject: legendObject,
+            data: legendData,
+            colors: legendColors,
+        }
     }
 
 

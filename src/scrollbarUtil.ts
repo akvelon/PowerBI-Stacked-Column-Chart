@@ -85,18 +85,18 @@ module powerbi.extensibility.visual.visualUtils {
             this.updateMeasurements();
         }
 
-        updateData(action: ScrollbarState, updateType: VisualUpdateType, skipUpdatePosition: boolean): void {
+        updateData(action: ScrollbarState, updateType: VisualUpdateType): void {
             this.settings.minCategorySpace =  this.visual.getSettings().categoryAxis.minCategoryWidth;
 
             let availableSpace: number = this.visual.viewport.width - this.visual.visualMargin.left - this.visual.visualMargin.right;
 
             this.capacity = Math.floor(availableSpace / this.settings.minCategorySpace);
-            this.scrolling.positionsCount = this.visual.allUniqueCategories.length - this.capacity;
+            this.scrolling.positionsCount = this.visual.categoriesCount - this.capacity;
 
             if ( this.allow && action === ScrollbarState.Enable && this.scrolling.positionsCount > 0 ) {
                 this.enable();
                 const resizeEndCode = 36; // It's incorrect in the VisualUpdateType enum for some reason
-                if (skipUpdatePosition || updateType === VisualUpdateType.Resize || updateType === resizeEndCode) {
+                if (updateType === VisualUpdateType.Resize || updateType === resizeEndCode ){
                     this.correctScrollingPosition();
                 } else {
                     this.updateScrollingPosition(0);
@@ -244,9 +244,11 @@ module powerbi.extensibility.visual.visualUtils {
             let visualTranslation: VisualTranslation = this.visual.getVisualTranslation();
             const track: Track = this.track;
 
+            let leftMargin: number = this.visual.settings.valueAxis.position === "left" ? this.visual.axesSize.yAxisWidth + this.visual.yTickOffset : 0;
+
             track.height = this.settings.trackSize;
             track.width = this.visual.visualSize.width;
-            track.left = visualTranslation.x;
+            track.left = visualTranslation.x + leftMargin;
             track.top = this.visual.viewport.height - this.settings.trackSize;
 
             let legendPosition = this.visual.settings.legend.position;
