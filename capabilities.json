@@ -37,6 +37,16 @@
             ]
         },
         {
+            "displayName": "Column By",
+            "name": "ColumnBy",
+            "kind": "Grouping"
+        },
+        {
+            "displayName": "Row By",
+            "name": "RowBy",
+            "kind": "Grouping"
+        },
+        {
             "displayName": "Tooltips",
             "name": "Tooltips",
             "kind": "Measure"
@@ -52,6 +62,187 @@
                     "displayNameKey": "Visual_SelectionSaveSettings_Selection",
                     "type": {
                         "text": true
+                    }
+                }
+            }
+        },
+        "smallMultiple": {
+            "displayName": "Small Multiple",
+            "properties": {
+                "layoutMode": {
+                    "displayName": "Layout Mode",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "Flow",
+                                "description": "Flow",
+                                "value": "flow"
+                            },
+                            {
+                                "displayName": "Matrix",
+                                "description": "Matrix",
+                                "value": "matrix"
+                            }
+                        ]
+                    }
+                },
+                "minUnitWidth": {
+                    "displayName": "Min Unit Width",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "minUnitHeight": {
+                    "displayName": "Min Unit Height",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "maxRowWidth": {
+                    "displayName": "Max Row Width",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "showChartTitle": {
+                    "displayName": "Show Chart Title",
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "textColor": {
+                    "displayName": "Text Color",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }                   
+                },
+                "fontFamily": {
+                    "displayName": "Font Family",
+                    "displayNameKey": "Visual_Legend_FontFamily",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "Arial",
+                                "value": "Arial"
+                            },
+                            {
+                                "displayName": "Arial Black",
+                                "value": "\"Arial Black\""
+                            },
+                            {
+                                "displayName": "Arial Unicode MS",
+                                "value": "\"Arial Unicode MS\""
+                            },
+                            {
+                                "displayName": "Calibri",
+                                "value": "Calibri"
+                            },
+                            {
+                                "displayName": "Cambria",
+                                "value": "Cambria"
+                            },
+                            {
+                                "displayName": "Cambria Math",
+                                "value": "\"Cambria Math\""
+                            },
+                            {
+                                "displayName": "Candara",
+                                "value": "Candara"
+                            },
+                            {
+                                "displayName": "Comic Sans MS",
+                                "value": "\"Comic Sans MS\""
+                            },
+                            {
+                                "displayName": "Consolas",
+                                "value": "Consolas"
+                            },
+                            {
+                                "displayName": "Constantia",
+                                "value": "Constantia"
+                            },
+                            {
+                                "displayName": "Corbel",
+                                "value": "Corbel"
+                            },
+                            {
+                                "displayName": "Courier New",
+                                "value": "\"Courier New\""
+                            },
+                            {
+                                "displayName": "Georgia",
+                                "value": "Georgia"
+                            },
+                            {
+                                "displayName": "Lucida Sans Unicode",
+                                "value": "\"Lucida Sans Unicode\""
+                            },
+                            {
+                                "displayName": "Segoe (Bold)",
+                                "value": "\"Segoe UI Bold\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                            },
+                            {
+                                "displayName": "Segoe UI",
+                                "value": "\"Segoe UI\", wf_segoe-ui_normal, helvetica, arial, sans-serif"
+                            },
+                            {
+                                "displayName": "Segoe UI Light",
+                                "value": "\"Segoe UI Light\", wf_segoe-ui_bold, helvetica, arial, sans-serif"
+                            },
+                            {
+                                "displayName": "Symbol",
+                                "value": "Symbol"
+                            },
+                            {
+                                "displayName": "Tahoma",
+                                "value": "Tahoma"
+                            },
+                            {
+                                "displayName": "Times New Roman",
+                                "value": "\"Times New Roman\""
+                            },
+                            {
+                                "displayName": "Trebuchet MS",
+                                "value": "\"Trebuchet MS\""
+                            },
+                            {
+                                "displayName": "Verdana",
+                                "value": "Verdana"
+                            },
+                            {
+                                "displayName": "Wingdings",
+                                "value": "Wingdings"
+                            }
+                        ]
+                    }
+                },
+                "fontSize": {
+                    "displayName": "Text Size",
+                    "displayNameKey": "Visual_Legend_TextSize",
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                },
+                "fontColor": {
+                    "displayName": "Font Color",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }                   
+                },
+                "showSeparators": {
+                    "displayName": "Show Separators",
+                    "type": {
+                        "bool": true
                     }
                 }
             }
@@ -1057,12 +1248,12 @@
             "properties": {
                 "show": {
                     "displayName": "Show",
-                    "displayNameKey": "Show",
+                    "displayNameKey": "Visual_CategoryLabels_Show",
                     "type": {
                         "bool": true
                     }
                 },
-                "lineColor": {
+                "color": {
                     "displayName": "Color",
                     "displayNameKey": "Visual_CategoryLabels_LabelsFill",
                     "type": {
@@ -1495,6 +1686,12 @@
                     "Gradient": {
                         "max": 0
                     },
+                    "ColumnBy": {
+                        "max": 1
+                    },
+                    "RowBy": {
+                        "max": 1
+                    },
                     "Tooltips": {
                         "min": 0
                     }
@@ -1511,6 +1708,16 @@
                                 "top": {
                                     "count": 30000
                                 }
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "ColumnBy"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "RowBy"
                             }
                         }
                     ]
@@ -1554,6 +1761,12 @@
                     "Gradient": {
                         "max": 0
                     },
+                    "ColumnBy": {
+                        "max": 1
+                    },
+                    "RowBy": {
+                        "max": 1
+                    },
                     "Tooltips": {
                         "min": 0
                     }
@@ -1570,6 +1783,16 @@
                                 "top": {
                                     "count": 30000
                                 }
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "ColumnBy"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "RowBy"
                             }
                         }
                     ]
@@ -1611,6 +1834,12 @@
                     "Gradient": {
                         "max": 1
                     },
+                    "ColumnBy": {
+                        "max": 1
+                    },
+                    "RowBy": {
+                        "max": 1
+                    },
                     "Tooltips": {
                         "min": 0
                     }
@@ -1627,6 +1856,16 @@
                                 "top": {
                                     "count": 30000
                                 }
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "ColumnBy"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "RowBy"
                             }
                         }
                     ]

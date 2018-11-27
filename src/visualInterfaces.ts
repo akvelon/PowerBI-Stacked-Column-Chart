@@ -2,6 +2,7 @@ module powerbi.extensibility.visual {
     import IAxisProperties = powerbi.extensibility.utils.chart.axis.IAxisProperties;
     import SelectableDataPoint = powerbi.extensibility.utils.interactivity.SelectableDataPoint;
     import LegendData = powerbi.extensibility.utils.chart.legend.LegendData;
+    import legend = powerbi.extensibility.utils.chart.legend;
 
     export interface IMargin {
         top: number;
@@ -13,6 +14,11 @@ module powerbi.extensibility.visual {
     export interface ISize {
         width: number;
         height: number;
+    }
+
+    export interface SmallMultipleSizeOptions extends ISize {
+        isVerticalSliderNeeded: boolean;
+        isHorizontalSliderNeeded: boolean;
     }
 
     export interface IAxes {
@@ -38,6 +44,8 @@ module powerbi.extensibility.visual {
         public Value: DataViewValueColumn[] | DataViewValueColumn = null;
         public ColorSaturation: DataViewValueColumn = null;
         public Tooltips: DataViewValueColumn[] | DataViewValueColumn = null;
+        public ColumnBy: DataViewValueColumn = null;
+        public RowBy: DataViewValueColumn = null;
         public GroupedValues: DataViewValueColumns = null;
     }
 
@@ -56,6 +64,10 @@ module powerbi.extensibility.visual {
         fill?: string;
         barCoordinates?: Coordinates;
         labelCoordinates?: Coordinates;
+        columnBy?: PrimitiveValue;
+        rowBy?: PrimitiveValue;         
+        preSelected?: boolean;
+        preRemoved?: boolean;
     }
 
     export interface Coordinates {
@@ -70,9 +82,9 @@ module powerbi.extensibility.visual {
         legendData: LegendData;
         hasHighlight: boolean;
         isLegendNeeded: boolean;
-        size: ISize;
+        size?: ISize;
         axes: IAxes;
-        categories: any[];
+        categoriesCount: number;
     }
 
     export interface IAxesSize {
@@ -92,6 +104,8 @@ module powerbi.extensibility.visual {
         value?: number;
         y?: number;
         gradient?: number;
+        columnBy?: number;
+        rowBy?: number;
     }
 
     export interface VisualMeasureMetadataColumns {
@@ -130,6 +144,29 @@ module powerbi.extensibility.visual {
     }
 
     export type SelectionState = undefined | null | 'selected' | 'justSelected' | 'justRemoved';
+
+    export interface LegendProperties {
+        legendObject: DataViewObject;
+        data: LegendData;
+        colors: string[];
+    }
+
+    export interface ChartOptions {
+        maxYLabelWidth
+    }
+
+    export interface SmallMultipleOptions {
+        rows: PrimitiveValue[],
+        columns: PrimitiveValue[],
+        chartSize: ISize,
+        leftSpace: number,
+        topSpace: number,
+        textHeight?: number,
+        chartElement: d3.Selection<any>,
+        xAxisLabelSize: number,
+        index?: number,
+        rowsInFlow?: number
+    }
 }
 
 

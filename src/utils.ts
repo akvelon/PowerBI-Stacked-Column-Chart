@@ -4,18 +4,35 @@ module powerbi.extensibility.visual.visualUtils {
     import TextProperties = powerbi.extensibility.utils.formatting.TextProperties;
     import IValueFormatter = powerbi.extensibility.utils.formatting.IValueFormatter;
     import TextMeasurementService = powerbi.extensibility.utils.formatting.textMeasurementService;
+    import PixelConverter = powerbi.extensibility.utils.type.PixelConverter;
+    import axis = powerbi.extensibility.utils.chart.axis;
+    import valueType = powerbi.extensibility.utils.type.ValueType;
 
     const DisplayUnitValue: number = 1;
 
-    export function calculateBarCoordianates(data: VisualData, settings: VisualSettings, dataPointThickness: number): void {
-        const categoryAxisIsContinuous: boolean = data.axes.xIsScalar && settings.categoryAxis.axisType !== "categorical";
+    export function calculateBarCoordianatesByData(data: VisualData, settings: VisualSettings, barHeight: number): void {
+        let dataPoints: VisualDataPoint[] = data.dataPoints;
+        let axes: IAxes = data.axes;
+
+        this.calculateBarCoordianates(dataPoints, axes, settings, barHeight);
+    }
+
+    export function calculateBarCoordianates(dataPoints: VisualDataPoint[], axes: IAxes, settings: VisualSettings, dataPointThickness: number): void {
+        const categoryAxisIsContinuous: boolean = axes.xIsScalar && settings.categoryAxis.axisType !== "categorical";
 
         const categoryAxisStartValue: number = categoryAxisIsContinuous && settings.categoryAxis.start ? settings.categoryAxis.start : 0;
         const categoryAxisEndValue: number = categoryAxisIsContinuous && settings.categoryAxis.end ? settings.categoryAxis.end : Number.MAX_VALUE;
 
         const thickness: number = dataPointThickness;
 
-        data.dataPoints.forEach(point => {
+        dataPoints.forEach(point => {
+            let width = 0;
+            if (axes.xIsScalar && categoryAxisIsContinuous) {
+                width = dataPointThickness < 0 ? 0 : dataPointThickness;
+            } else {
+                width = axes.x.scale.rangeBand();
+            }
+
             if (categoryAxisIsContinuous){
                 const categoryvalueIsInRange: boolean = point.category >= categoryAxisStartValue && point.category <= categoryAxisEndValue;
                 if (!categoryvalueIsInRange){
@@ -24,17 +41,15 @@ module powerbi.extensibility.visual.visualUtils {
                 }
             }
 
-            let x: number = data.axes.x.scale(point.category);
+            let x: number = axes.x.scale(point.category);
             if (categoryAxisIsContinuous) {
                 x -= thickness / 2;
             }
 
-            const fromValue: number = point.shiftValue;
-            let fromCoordinate: number = data.axes.y.scale(fromValue);
-            fromCoordinate = Math.min(fromCoordinate, data.size.height);
-            const toValue = fromValue + point.valueForHeight;
-            let toCoordinate: number = data.axes.y.scale(toValue);
-            toCoordinate = Math.max(toCoordinate, 0);
+            const fromValue: number = Math.max(point.shiftValue, axes.y.dataDomain[0]);
+            const fromCoordinate: number = axes.y.scale(fromValue);
+            const toValue = Math.min(fromValue + point.valueForHeight, axes.y.dataDomain[1]);
+            const toCoordinate: number = axes.y.scale(toValue);
 
             if ( toCoordinate >= fromCoordinate ){
                 setZeroCoordinatesForPoint(point);
@@ -48,14 +63,14 @@ module powerbi.extensibility.visual.visualUtils {
 
             point.barCoordinates = {
                 height: volume,
-                width: thickness,
+                width: width,
                 x,
                 y: toCoordinate
             };
         });
 
-        if (data.axes.xIsScalar && settings.categoryAxis.axisType !== "categorical") {
-            recalculateThicknessForContinuous(data, thickness);
+        if (axes.xIsScalar && settings.categoryAxis.axisType !== "categorical") {
+            recalculateThicknessForContinuous(dataPoints, thickness);
         }
     }
 
@@ -63,21 +78,21 @@ module powerbi.extensibility.visual.visualUtils {
         point.barCoordinates = {height: 0, width: 0, x: 0, y: 0};
     }
 
-    export function recalculateThicknessForContinuous(data: VisualData, dataPointThickness: number) {
+    export function recalculateThicknessForContinuous(dataPoints: VisualDataPoint[], dataPointThickness: number) {
         let minWidth: number = 1.5,
             minDistance: number = Number.MAX_VALUE;
 
-        let dataPoints: VisualDataPoint[] = data.dataPoints.sort((a, b) => {
+        let sortedDataPoints: VisualDataPoint[] = dataPoints.sort((a, b) => {
             return a.barCoordinates.x - b.barCoordinates.x;
         });
 
-        let firstDataPoint: VisualDataPoint = dataPoints[0];
+        let firstDataPoint: VisualDataPoint = sortedDataPoints[0];
 
-        for (let i = 1; i < dataPoints.length; ++i) {
-            let distance: number = dataPoints[i].barCoordinates.x - firstDataPoint.barCoordinates.x;
+        for (let i = 1; i < sortedDataPoints.length; ++i) {
+            let distance: number = sortedDataPoints[i].barCoordinates.x - firstDataPoint.barCoordinates.x;
 
             minDistance = distance < minDistance ? distance : minDistance;
-            firstDataPoint = dataPoints[i];
+            firstDataPoint = sortedDataPoints[i];
         }
 
         if (minDistance < minWidth) {
@@ -89,7 +104,7 @@ module powerbi.extensibility.visual.visualUtils {
         }
 
         if (dataPointThickness && dataPointThickness !== minWidth) {
-            dataPoints.forEach(x => {
+            sortedDataPoints.forEach(x => {
                 x.barCoordinates.width = x.barCoordinates.width ? minWidth : 0;
                 x.barCoordinates.x = x.barCoordinates.x + dataPointThickness / 2;
             });
@@ -100,12 +115,13 @@ module powerbi.extensibility.visual.visualUtils {
                                             settings: categoryLabelsSettings,
                                             metadata: VisualMeasureMetadata,
                                             chartHeight: number,
-                                            isLegendRendered: boolean) {
+                                            isLegendRendered: boolean,
+                                            dataPoints: VisualDataPoint[] = null) {
         if (!settings.show) {
             return;
         }
 
-        let dataPointsArray: VisualDataPoint[] = data.dataPoints;
+        let dataPointsArray: VisualDataPoint[] = dataPoints || data.dataPoints;
 
         let dataLabelFormatter: IValueFormatter = formattingUtils.createFormatter(settings.displayUnits,
                                                                         settings.precision,
@@ -223,24 +239,26 @@ module powerbi.extensibility.visual.visualUtils {
         return DefaultOpacity;
     }
 
-    const CategoryMinHeight: number = 16;
-    const CategoryMaxHeight: number = 130;
+    const CategoryMinWidth: number = 1;
+    const CategoryMaxWidth: number = 450;
     const CategoryContinuousMinHeight: number = 1;
 
     export function calculateDataPointThickness( // calculateBarHeight
         visualDataPoints: VisualDataPoint[],
         visualSize: ISize,
-        categories: string[],
+        categoriesCount: number,
         categoryInnerPadding: number,
-        yScale: any,
-        settings: VisualSettings): number {
+        settings: VisualSettings,
+        isCategorical: boolean = false): number {
 
-        let currentBarHeight = visualSize.height / categories.length;
-        let barHeight: number = 0;
+        let currentThickness = visualSize.width / categoriesCount;
+        let thickness: number = 0;
 
-        if (settings.categoryAxis.axisType === "categorical") {
+        if (isCategorical || settings.categoryAxis.axisType === "categorical") {
             let innerPadding: number = categoryInnerPadding / 100;
-            barHeight = d3.min([CategoryMaxHeight, d3.max([CategoryMinHeight, currentBarHeight])]) * (1 - innerPadding);
+
+            thickness = d3.min([CategoryMaxWidth, d3.max([CategoryMinWidth, currentThickness])]) * (1 - innerPadding);
+
         } else {
             let dataPoints = [...visualDataPoints];
 
@@ -256,14 +274,14 @@ module powerbi.extensibility.visual.visualUtils {
 
             if (dataPointsCount < 4) {
                 let devider: number = 3.75;
-                barHeight = visualSize.width / devider;
+                thickness = visualSize.width / devider;
             } else {
                 let devider: number = 3.75 + 1.25 * (dataPointsCount - 3); 
-                barHeight = visualSize.width / devider;
+                thickness = visualSize.width / devider;
             }
         }
 
-        return barHeight;
+        return thickness;
     }
 
     export function getLabelsMaxWidth(group: d3.selection.Group): number {
@@ -320,6 +338,25 @@ module powerbi.extensibility.visual.visualUtils {
         return TextMeasurementService.estimateSvgTextHeight(textPropertiesForHeight);
     }
 
+    export function smallMultipleLabelRotationIsNeeded(
+        xAxisSvgGroup: d3.Selection<any>,
+        barHeight: number,
+        categoryAxisSettings: categoryAxisSettings,
+        maxLabelHeight: number
+    ): boolean {
+        const rangeBand = barHeight;
+
+        let maxLabelWidth: number = 0;
+
+        xAxisSvgGroup.selectAll('text').each(function(){
+            const labelWidth: number = this.getBoundingClientRect().width;
+
+            maxLabelWidth = Math.max(maxLabelWidth, labelWidth > maxLabelHeight ? maxLabelHeight : labelWidth);
+        });
+
+        return maxLabelWidth > rangeBand;
+    }
+
     export function compareObjects(obj1: any[], obj2: any[], property: string): boolean {
         let isEqual: boolean = false;
 
@@ -337,5 +374,12 @@ module powerbi.extensibility.visual.visualUtils {
         }
 
         return isEqual;
+    }
+
+    export function isScalar(column: DataViewMetadataColumn) {
+        const categoryType: valueType = axis.getCategoryValueType(column);
+        let isOrdinal: boolean = axis.isOrdinal(categoryType);
+
+        return !isOrdinal;
     }
 }
