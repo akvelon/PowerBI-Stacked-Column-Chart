@@ -30,6 +30,7 @@ module powerbi.extensibility.visual {
             metadata: VisualMeasureMetadata,
             settings: VisualSettings,
             host: IVisualHost,
+            isSmallMultiple: boolean = false,
             dataPointThickness: number = null,
             maxXLabelsWidth = null): IAxes {
 
@@ -47,6 +48,10 @@ module powerbi.extensibility.visual {
 
             let yAxisFormatString: string = valueFormatter.getFormatStringByColumn(metadata.cols.value);
 
+            const skipValueRange: boolean = isSmallMultiple && settings.valueAxis.rangeType !== AxisRangeType.Custom,
+                startValue: number = skipValueRange ? null : settings.valueAxis.start,
+                endValue: number = skipValueRange ? null : settings.valueAxis.end;
+
             yAxisProperties = createAxis({
                 pixelSpan: size.height,
                 dataDomain: axesDomains.yAxisDomain,
@@ -60,7 +65,7 @@ module powerbi.extensibility.visual {
                 scaleType: valueAxisScale,
                 useTickIntervalForDisplayUnits: true,
                 axisDisplayUnits: settings.valueAxis.displayUnits,
-                disableNice: settings.valueAxis.start != null || settings.valueAxis.end != null,
+                disableNice: startValue != null || endValue != null,
                 axisPrecision: yAxisPrecision
             });
 
@@ -111,6 +116,10 @@ module powerbi.extensibility.visual {
             let fontSize: string = PixelConverter.toString(settings.categoryAxis.fontSize);
             let fontFamily: string = settings.categoryAxis.fontFamily;
 
+            const skipCategoryRange: boolean = isSmallMultiple && settings.categoryAxis.rangeType !== AxisRangeType.Custom,
+                startCategory: number = skipCategoryRange ? null : settings.categoryAxis.start,
+                endCategory: number = skipCategoryRange ? null : settings.categoryAxis.end;
+
             xAxisProperties = createAxis({
                 pixelSpan: size.width,
                 dataDomain: axesDomains.xAxisDomain,
@@ -125,7 +134,7 @@ module powerbi.extensibility.visual {
                 useTickIntervalForDisplayUnits: true,
                 axisDisplayUnits: settings.categoryAxis.displayUnits,
                 axisPrecision: xAxisPrecision,
-                disableNice: axisType === "continuous" && (settings.categoryAxis.start != null || settings.categoryAxis.end != null),
+                disableNice: axisType === "continuous" && (startCategory != null || endCategory != null),
                 getValueFn: (index: number, dataType: valueType): any => {
 
                     if (dataType.dateTime && dateColumnFormatter) {
@@ -393,8 +402,21 @@ module powerbi.extensibility.visual {
                 });
         }
 
-        public static calculateAxesDomains(allDatapoint: VisualDataPoint[], visibleDatapoints: VisualDataPoint[], settings: VisualSettings, metadata: VisualMeasureMetadata): AxesDomains {
+        public static calculateAxesDomains(allDatapoint: VisualDataPoint[], 
+            visibleDatapoints: VisualDataPoint[], 
+            settings: VisualSettings, 
+            metadata: VisualMeasureMetadata, 
+            isSmallMultiple: boolean = false): AxesDomains {
+            return {
+                xAxisDomain: this.calculateCategoryDomain(visibleDatapoints, settings, metadata, isSmallMultiple),
+                yAxisDomain: this.calculateValueDomain(allDatapoint, settings, isSmallMultiple) 
+            };
+        }
 
+        public static calculateValueDomain(allDatapoint: VisualDataPoint[], 
+            settings: VisualSettings, 
+            isSmallMultiple: boolean = false): any[] { 
+            
             let minValue: number = d3.min(allDatapoint, d => <number>d.sum);
             let maxValue: number = d3.max(allDatapoint, d => <number>d.sum);
 
@@ -404,23 +426,6 @@ module powerbi.extensibility.visual {
             let dataDomainMinY: number = minValue;
             let dataDomainMaxY: number = maxValue;
 
-            const categoryType: valueType = axis.getCategoryValueType(metadata.cols.category);
-            let isOrdinal: boolean = axis.isOrdinal(categoryType);
-
-            let dataDomainX = visibleDatapoints.map(d => <any>d.category);
-            let xIsScalar: boolean = !isOrdinal;
-            let axisType: string = !xIsScalar ? "categorical" : settings.categoryAxis.axisType;
-
-            if (xIsScalar && axisType === "continuous") {
-                let dataDomainMinX: number = d3.min(visibleDatapoints, d => <number>d.category);
-                let dataDomainMaxX: number = d3.max(visibleDatapoints, d => <number>d.category);
-
-                let start = settings.categoryAxis.start;
-                let end = settings.categoryAxis.end;
-
-                dataDomainX = [start != null ? settings.categoryAxis.start : dataDomainMinX, end != null ? end : dataDomainMaxX];
-            }
-
             let constantLineValue: number = settings.constantLine.value;
 
             if (constantLineValue || constantLineValue === 0) {
@@ -428,13 +433,40 @@ module powerbi.extensibility.visual {
                 dataDomainMaxY = dataDomainMaxY < constantLineValue ? constantLineValue : dataDomainMaxY;
             }
 
-            let start = settings.valueAxis.start;
-            let end = settings.valueAxis.end;
+            const skipStartEnd: boolean = isSmallMultiple && settings.valueAxis.rangeType !== AxisRangeType.Custom;
 
-            return {
-                xAxisDomain: dataDomainX,
-                yAxisDomain: [start != null ? start : dataDomainMinY, end != null ? end : dataDomainMaxY]
-            };
+            let start = skipStartEnd ? null : settings.valueAxis.start;
+            let end = skipStartEnd ? null : settings.valueAxis.end;
+
+            return [start != null ? start : dataDomainMinY, end != null ? end : dataDomainMaxY]
+        }
+
+        public static calculateCategoryDomain(visibleDatapoints: VisualDataPoint[], 
+            settings: VisualSettings, 
+            metadata: VisualMeasureMetadata, 
+            isSmallMultiple: boolean = false): any[] { 
+            
+            const categoryType: valueType = axis.getCategoryValueType(metadata.cols.category);
+            let isOrdinal: boolean = axis.isOrdinal(categoryType);
+
+            let dataDomainX = visibleDatapoints.map(d => <any>d.category);
+
+            let xIsScalar: boolean = !isOrdinal;
+            let axisType: string = !xIsScalar ? "categorical" : settings.categoryAxis.axisType;
+
+            if (xIsScalar && axisType === "continuous") {
+                let dataDomainMinX: number = d3.min(visibleDatapoints, d => <number>d.category);
+                let dataDomainMaxX: number = d3.max(visibleDatapoints, d => <number>d.category);
+
+                const skipStartEnd: boolean = isSmallMultiple && settings.categoryAxis.rangeType !== AxisRangeType.Custom;
+
+                let start = skipStartEnd ? null : settings.categoryAxis.start;
+                let end = skipStartEnd ? null : settings.categoryAxis.end;
+
+                dataDomainX = [start != null ? settings.categoryAxis.start : dataDomainMinX, end != null ? end : dataDomainMaxX];
+            }
+
+            return dataDomainX;
         }
     }
 }
