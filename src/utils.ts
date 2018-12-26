@@ -23,10 +23,13 @@ module powerbi.extensibility.visual.visualUtils {
         const skipCategoryStartEnd: boolean = isSmallMultiple && settings.categoryAxis.rangeType !== AxisRangeType.Custom,
             skipValueStartEnd: boolean = isSmallMultiple && settings.valueAxis.rangeType !== AxisRangeType.Custom;
 
-        const categoryAxisStartValue: number = categoryAxisIsContinuous && settings.categoryAxis.start ? settings.categoryAxis.start : 0;
+        const categoryAxisStartValue: number = categoryAxisIsContinuous && settings.categoryAxis.start ? settings.categoryAxis.start : -Number.MAX_VALUE;
         const categoryAxisEndValue: number = categoryAxisIsContinuous && settings.categoryAxis.end ? settings.categoryAxis.end : Number.MAX_VALUE;
 
         const thickness: number = dataPointThickness;
+
+        // Implement correct continuous logic instead of this!!!
+        dataPointThickness = 5 < dataPointThickness ? 5 : dataPointThickness;
 
         dataPoints.forEach(point => {
             let width = 0;
@@ -50,7 +53,7 @@ module powerbi.extensibility.visual.visualUtils {
 
             let x: number = axes.x.scale(point.category);
             if (categoryAxisIsContinuous) {
-                x -= thickness / 2;
+                //x -= thickness / 2;
             }
             if (point.shiftValue > axes.y.dataDomain[1]) {
                 setZeroCoordinatesForPoint(point);
@@ -106,6 +109,7 @@ module powerbi.extensibility.visual.visualUtils {
         let firstDataPoint: VisualDataPoint = sortedDataPoints[0];
 
         for (let i = 1; i < sortedDataPoints.length; ++i) {
+
             let distance: number = sortedDataPoints[i].barCoordinates.x - firstDataPoint.barCoordinates.x;
 
             minDistance = distance < minDistance ? distance : minDistance;
@@ -122,8 +126,10 @@ module powerbi.extensibility.visual.visualUtils {
 
         if (dataPointThickness && dataPointThickness !== minWidth) {
             sortedDataPoints.forEach(x => {
-                x.barCoordinates.width = x.barCoordinates.width ? minWidth : 0;
-                x.barCoordinates.x = x.barCoordinates.x + dataPointThickness / 2;
+                const padding: number = minWidth / 100 * 20,
+                    width: number = x.barCoordinates.width ? minWidth - padding : 0;
+                x.barCoordinates.width = width;
+                x.barCoordinates.x = x.barCoordinates.x + dataPointThickness / 2 - width / 2;
             });
         }
     }

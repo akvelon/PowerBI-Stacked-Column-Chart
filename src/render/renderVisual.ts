@@ -654,8 +654,8 @@ module powerbi.extensibility.visual {
                         dy: "1em"
                     })
                     .text(d => {
-                        if (d) {
-                            textProperties.text = d && d.toString();
+                        if (d || d === 0) {
+                            textProperties.text = d.toString();
                             return TextMeasurementService.getTailoredTextOrDefault(textProperties, chartSize.width - 10);
                         }         
                         
