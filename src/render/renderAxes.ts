@@ -101,8 +101,7 @@ module powerbi.extensibility.visual {
                     cultureSelector: host.locale
                 });
             }
-
-            let innerPadding: number = settings.categoryAxis.innerPadding / 100;
+            let innerPadding: number =  settings.categoryAxis.innerPadding / 100;
             const outerPadding: number = xIsScalar && axisType === "continuous" ? dataPointThickness / 2 : 0;
 
             let xAxisPrecision: any = settings.categoryAxis && settings.categoryAxis.precision != null && settings.categoryAxis.precision >= 0

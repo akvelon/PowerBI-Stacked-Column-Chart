@@ -113,6 +113,13 @@ module powerbi.extensibility.visual {
                             delete instance.properties["minCategoryWidth"];
                             delete instance.properties["maximumSize"];
                             delete instance.properties["innerPadding"];
+
+                            if (visualData.isSmallMultiple) {
+                                if (settings.categoryAxis.rangeType !== AxisRangeType.Custom) {                                    
+                                    delete instance.properties["start"];
+                                    delete instance.properties["end"];
+                                }
+                            }
                         }
                     } else {
                         delete instance.properties["axisType"];

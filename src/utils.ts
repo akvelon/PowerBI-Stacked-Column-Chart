@@ -28,19 +28,12 @@ module powerbi.extensibility.visual.visualUtils {
 
         const thickness: number = dataPointThickness;
 
-        // Implement correct continuous logic instead of this!!!
-        dataPointThickness = 5 < dataPointThickness ? 5 : dataPointThickness;
-
         dataPoints.forEach(point => {
             let width = 0;
-            if (axes.xIsScalar && categoryAxisIsContinuous) {
-                let start = skipCategoryStartEnd ? null : settings.categoryAxis.start,
-                    end = skipCategoryStartEnd ? null : settings.categoryAxis.end;
-
-                width = start != null && start > point.category || dataPointThickness < 0 ? 0 : dataPointThickness;
-                width = end != null && end <= point.category ? 0 : dataPointThickness;
-            } else {
+            if (!axes.xIsScalar || !categoryAxisIsContinuous) {
                 width = axes.x.scale.rangeBand();
+            } else {
+                width = dataPoints.length > 2 ? dataPointThickness * 0.8 : dataPointThickness / 2 * 0.8;
             }
 
             if (categoryAxisIsContinuous){
@@ -52,9 +45,6 @@ module powerbi.extensibility.visual.visualUtils {
             }
 
             let x: number = axes.x.scale(point.category);
-            if (categoryAxisIsContinuous) {
-                //x -= thickness / 2;
-            }
             if (point.shiftValue > axes.y.dataDomain[1]) {
                 setZeroCoordinatesForPoint(point);
                 return;
@@ -90,7 +80,7 @@ module powerbi.extensibility.visual.visualUtils {
         });
 
         if (axes.xIsScalar && settings.categoryAxis.axisType !== "categorical") {
-            recalculateThicknessForContinuous(dataPoints, thickness);
+            recalculateThicknessForContinuous(dataPoints, skipCategoryStartEnd, settings.categoryAxis, thickness);
         }
     }
 
@@ -98,40 +88,51 @@ module powerbi.extensibility.visual.visualUtils {
         point.barCoordinates = {height: 0, width: 0, x: 0, y: 0};
     }
 
-    export function recalculateThicknessForContinuous(dataPoints: VisualDataPoint[], dataPointThickness: number) {
+    export function recalculateThicknessForContinuous(dataPoints: VisualDataPoint[], skipCategoryStartEnd: boolean, categorySettings: categoryAxisSettings, startThickness: number) {
         let minWidth: number = 1.5,
             minDistance: number = Number.MAX_VALUE;
+
+        let start = skipCategoryStartEnd ? null : categorySettings.start,
+            end = skipCategoryStartEnd ? null : categorySettings.end;
 
         let sortedDataPoints: VisualDataPoint[] = dataPoints.sort((a, b) => {
             return a.barCoordinates.x - b.barCoordinates.x;
         });
 
-        let firstDataPoint: VisualDataPoint = sortedDataPoints[0];
+        let sortedBarCoordinates: number[] = sortedDataPoints.map(d => d.barCoordinates.x).filter((v, i, a) => a.indexOf(v) === i);
 
-        for (let i = 1; i < sortedDataPoints.length; ++i) {
+        let firstCoodinate: number = sortedBarCoordinates[0];
 
-            let distance: number = sortedDataPoints[i].barCoordinates.x - firstDataPoint.barCoordinates.x;
+        for (let i = 1; i < sortedBarCoordinates.length; ++i) {
+
+            let distance: number = sortedBarCoordinates[i] - firstCoodinate;
 
             minDistance = distance < minDistance ? distance : minDistance;
-            firstDataPoint = sortedDataPoints[i];
+            firstCoodinate = sortedBarCoordinates[i];
         }
 
         if (minDistance < minWidth) {
             
-        } else if (minWidth < minDistance && minDistance < dataPointThickness) {
+        } else if (minWidth < minDistance) {
             minWidth = minDistance;
-        } else {
-            minWidth = dataPointThickness;
         }
 
-        if (dataPointThickness && dataPointThickness !== minWidth) {
-            sortedDataPoints.forEach(x => {
-                const padding: number = minWidth / 100 * 20,
-                    width: number = x.barCoordinates.width ? minWidth - padding : 0;
-                x.barCoordinates.width = width;
-                x.barCoordinates.x = x.barCoordinates.x + dataPointThickness / 2 - width / 2;
-            });
-        }
+        sortedDataPoints.forEach(d => {
+            let width: number = 0;
+            if (startThickness > minWidth) {
+                let padding: number = minWidth / 100 * 20;
+                width = minWidth - padding;
+            } else {
+                width = d.barCoordinates.width;
+            }
+
+            width = start != null && start > d.category || width < 0 ? 0 : width;
+            width = end != null && end <= d.category ? 0 : width;
+
+            d.barCoordinates.width = width;
+
+            d.barCoordinates.x = d.barCoordinates.x - d.barCoordinates.width / 2;
+        });
     }
 
     export function calculateLabelCoordinates(data: VisualData,
@@ -296,7 +297,7 @@ module powerbi.extensibility.visual.visualUtils {
                                                 &&  end != null ? x.value <= end : true)
             }
 
-            let dataPointsCount: number = dataPoints.length;
+            let dataPointsCount: number = dataPoints.map(x => x.category).filter((v, i, a) => a.indexOf(v) === i).length;
 
             if (dataPointsCount < 4) {
                 let devider: number = 3.75;
