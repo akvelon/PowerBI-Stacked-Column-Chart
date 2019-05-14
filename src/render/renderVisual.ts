@@ -13,7 +13,7 @@ module powerbi.extensibility.visual {
     import translate = powerbi.extensibility.utils.svg.translate;
     import ClassAndSelector = powerbi.extensibility.utils.svg.CssConstants.ClassAndSelector;
     import createClassAndSelector = powerbi.extensibility.utils.svg.CssConstants.createClassAndSelector;
-    import TextProperties = powerbi.extensibility.utils.formatting.TextProperties;    
+    import TextProperties = powerbi.extensibility.utils.formatting.TextProperties;
     import TextMeasurementService = powerbi.extensibility.utils.formatting.textMeasurementService;
 
     module Selectors {
@@ -60,15 +60,26 @@ module powerbi.extensibility.visual {
                 .data(data.dataPoints);
 
             // For each new value, we create a new rectange.
-            barSelect.enter().append("rect")
-                .attr("class", Selectors.BarSelect.className);
+            barSelect.enter()
+            .append("clipPath");
 
             // Remove rectangles, that no longer have matching values.
             barSelect.exit()
                 .remove();
 
+            var self = this;
+            var path = "M500.87,77.913c6.146,0,11.13-4.984,11.13-11.13V22.261c0-6.146-4.984-11.13-11.13-11.13H11.13    C4.984,11.13,0,16.115,0,22.261v44.522c0,6.146,4.984,11.13,11.13,11.13h38.957v44.522H11.13c-6.146,0-11.13,4.984-11.13,11.13    v89.043c0,6.146,4.984,11.13,11.13,11.13h38.957v44.522H11.13c-6.146,0-11.13,4.984-11.13,11.13v89.043    c0,6.146,4.984,11.13,11.13,11.13h38.957v44.522H11.13c-6.146,0-11.13,4.984-11.13,11.13v44.522c0,6.146,4.984,11.13,11.13,11.13    H500.87c6.146,0,11.13-4.984,11.13-11.13v-44.522c0-6.146-4.984-11.13-11.13-11.13h-38.957v-44.522h38.957    c6.146,0,11.13-4.984,11.13-11.13v-89.043c0-6.146-4.984-11.13-11.13-11.13h-38.957v-44.522h38.957    c6.146,0,11.13-4.984,11.13-11.13v-89.043c0-6.146-4.984-11.13-11.13-11.13h-38.957V77.913H500.87z M489.739,456.348v22.261    H22.261v-22.261H489.739z M72.348,434.087v-44.522h33.391v44.522H72.348z M128,434.087v-44.522h89.043v44.522H128z     M239.304,434.087v-44.522h33.391v44.522H239.304z M294.957,434.087v-44.522H384v44.522H294.957z M406.261,434.087v-44.522h33.391    v44.522H406.261z M489.739,367.304H22.261v-22.261h467.478V367.304z M489.739,300.522v22.261H22.261v-22.261H489.739z     M72.348,278.261v-44.522h33.391v44.522H72.348z M128,278.261v-44.522h89.043v44.522H128z M239.304,278.261v-44.522h33.391v44.522    H239.304z M294.957,278.261v-44.522H384v44.522H294.957z M406.261,278.261v-44.522h33.391v44.522H406.261z M489.739,211.478    H22.261v-22.261h467.478V211.478z M489.739,144.696v22.261H22.261v-22.261H489.739z M72.348,122.435V77.913h33.391v44.522H72.348z     M128,122.435V77.913h89.043v44.522H128z M239.304,122.435V77.913h33.391v44.522H239.304z M294.957,122.435V77.913H384v44.522    H294.957z M406.261,122.435V77.913h33.391v44.522H406.261z M22.261,55.652V33.391h467.478v22.261H22.261z";
+            var viewBox = "0 0 512 512";
+            var iconBbox = this.retrieveIconBbox(barGroupSelect, path, data.dataPoints[0].barCoordinates.width, viewBox);
+            var transformHeight = data.dataPoints[0].barCoordinates.y + data.dataPoints[0].barCoordinates.height - iconBbox.y - iconBbox.height;
+
+            //debugger;
             barSelect
-                .attr({
+            .attr("id", d => (self as any).generateId(d) + "clipPath")
+            .attr("transform", d => "translate(" + -d.barCoordinates.x + ", " + -transformHeight + ")")
+            .append("rect")
+            .attr("class", Selectors.BarSelect.className)
+            .attr({
                     height: d => {
                         return d.barCoordinates.height;
                     },
@@ -82,6 +93,25 @@ module powerbi.extensibility.visual {
                         return d.barCoordinates.y;
                     },
                     fill: d => d.color
+                })
+                .each(function (d) {
+                    //debugger;
+                    var height = 0;
+
+                    while (height < d.barCoordinates.height) {
+                        barGroupSelect
+                        .append("g")
+                        .attr("transform", "translate(" + d.barCoordinates.x + ", " + (transformHeight - height) + ")")
+                        .attr("clip-path", a => "url(#" + (self as any).generateId(d) + "clipPath" + ")")
+                        .classed("removable", true)
+                        .append("svg")
+                        .attr("width", d.barCoordinates.width)
+                        .attr("viewBox", viewBox)
+                        .append("path")
+                        .attr("d", path);
+
+                        height += iconBbox.height;
+                    }
                 });
 
             let interactivityService = visualInteractivityService,
@@ -93,13 +123,13 @@ module powerbi.extensibility.visual {
                     p.highlight,
                     !p.highlight && hasSelection,
                     !p.selected && data.hasHighlight),
-                "stroke": (p: VisualDataPoint)  => {
+                "stroke": (p: VisualDataPoint) => {
                     if ((hasHighlight || hasSelection) && visualUtils.isSelected(p.selected,
                         p.highlight,
                         !p.highlight && hasSelection,
                         !p.selected && hasHighlight)) {
-                            return Visual.DefaultStrokeSelectionColor;
-                        }                        
+                        return Visual.DefaultStrokeSelectionColor;
+                    }
 
                     return p.color;
                 },
@@ -132,6 +162,31 @@ module powerbi.extensibility.visual {
             this.renderTooltip(barSelect, tooltipServiceWrapper);
         }
 
+        private static generateId(d) {
+            var id = (d.category as string).replace(/\s/g, "");
+
+            if (d.series !== undefined) {
+                id = id + (d.series as string).replace(/\s/g, "");
+            }
+            return id;
+        }
+
+        private static retrieveIconBbox(container, path, width, viewBox) {
+            var svg = container.append("g")
+                .attr("id", "imageClipping")
+                .append("svg")
+                .attr("width", width)
+                .attr("viewBox", viewBox)
+                .append("path")
+                .attr("d", path);
+
+            //Use the first icon draw in order to get the image clipping of the icon
+            var imageClipping = (d3.select("#imageClipping")[0][0] as any).getBBox();
+
+            d3.select("#imageClipping").remove();
+            return imageClipping;
+        }
+
         public static renderDataLabelsBackground(
             dataPoints: VisualDataPoint[],
             settings: VisualSettings,
@@ -147,8 +202,8 @@ module powerbi.extensibility.visual {
             }
 
             let backgroundSelection: UpdateSelection<VisualDataPoint> = dataLabelsBackgroundContext
-                        .selectAll(RenderVisual.Label.selectorName)
-                        .data(dataPoints);
+                .selectAll(RenderVisual.Label.selectorName)
+                .data(dataPoints);
 
             backgroundSelection
                 .enter()
@@ -199,8 +254,8 @@ module powerbi.extensibility.visual {
 
             let dataPointsArray: VisualDataPoint[] = this.filterData(dataPoints || data.dataPoints),
                 backgroundSelection: UpdateSelection<VisualDataPoint> = dataLabelsBackgroundContext
-                        .selectAll(RenderVisual.Label.selectorName)
-                        .data(dataPointsArray);
+                    .selectAll(RenderVisual.Label.selectorName)
+                    .data(dataPointsArray);
 
             backgroundSelection
                 .enter()
@@ -222,7 +277,7 @@ module powerbi.extensibility.visual {
                     },
                     rx: 4,
                     ry: 4,
-                    fill: settings.categoryLabels.backgroundColor                    
+                    fill: settings.categoryLabels.backgroundColor
                 });
 
             backgroundSelection.style({
@@ -249,9 +304,9 @@ module powerbi.extensibility.visual {
                 return;
             }
 
-            let  labelSelection: UpdateSelection<VisualDataPoint> = dataLabelsContext
-                        .selectAll(RenderVisual.Label.selectorName)
-                        .data(dataPoints);
+            let labelSelection: UpdateSelection<VisualDataPoint> = dataLabelsContext
+                .selectAll(RenderVisual.Label.selectorName)
+                .data(dataPoints);
 
             labelSelection
                 .enter()
@@ -296,14 +351,14 @@ module powerbi.extensibility.visual {
 
             let dataPointsArray: VisualDataPoint[] = this.filterData(dataPoints || data.dataPoints),
                 labelSelection: UpdateSelection<VisualDataPoint> = dataLabelsContext
-                        .selectAll(RenderVisual.Label.selectorName)
-                        .data(dataPointsArray);
+                    .selectAll(RenderVisual.Label.selectorName)
+                    .data(dataPointsArray);
 
             let dataLabelFormatter: IValueFormatter =
-                    formattingUtils.createFormatter(labelSettings.displayUnits,
-                                                    labelSettings.precision,
-                                                    metadata.cols.value,
-                                                    formattingUtils.getValueForFormatter(data));
+                formattingUtils.createFormatter(labelSettings.displayUnits,
+                    labelSettings.precision,
+                    metadata.cols.value,
+                    formattingUtils.getValueForFormatter(data));
 
             labelSelection
                 .enter()
@@ -359,7 +414,7 @@ module powerbi.extensibility.visual {
             }
 
             topTitlestext
-                .style({ 
+                .style({
                     "text-anchor": "middle",
                     "font-size": fontSizeInPx,
                     "font-family": fontFamily,
@@ -372,8 +427,8 @@ module powerbi.extensibility.visual {
                     if (d) {
                         textProperties.text = d && d.toString();
                         return TextMeasurementService.getTailoredTextOrDefault(textProperties, chartSize.width - 10);
-                    }         
-                    
+                    }
+
                     return null;
                 })
                 .call((text: d3.Selection<any>) => {
@@ -382,7 +437,7 @@ module powerbi.extensibility.visual {
 
                     textSelectionX.attr({
                         "transform": svg.translate(x, topSpace + textHeight / 2)
-                    });                    
+                    });
                 });
         }
 
@@ -402,7 +457,7 @@ module powerbi.extensibility.visual {
                     if (coords.x < filteredCoods.x + filteredCoods.width + 8
                         && coords.x + coords.width > filteredCoods.x + 8
                         && coords.y < filteredCoods.y + filteredCoods.height + 2
-                        && coords.y + coords.height > filteredCoods.y + 2 ) {
+                        && coords.y + coords.height > filteredCoods.y + 2) {
                         isIntersected = true;
                         break;
                     }
@@ -442,7 +497,7 @@ module powerbi.extensibility.visual {
 
             if (line[0][0]) {
                 element.selectAll("line").remove();
-            } 
+            }
 
             if (settings.position === Position.InFront) {
                 line = element.append("line");
@@ -451,7 +506,7 @@ module powerbi.extensibility.visual {
             }
 
             line
-                .classed("const-line", true)                    
+                .classed("const-line", true)
                 .style({
                     display: settings.show ? "unset" : "none",
                     stroke: settings.lineColor,
@@ -478,7 +533,7 @@ module powerbi.extensibility.visual {
             let textProperties: TextProperties = {
                 fontFamily: "wf_standard-font, helvetica, arial, sans-serif",
                 fontSize: "10px"
-            };            
+            };
 
             let text: string = this.getLineText(settings);
             let textWidth: number = TextMeasurementService.measureSvgTextWidth(textProperties, text);
@@ -492,8 +547,8 @@ module powerbi.extensibility.visual {
 
             if (settings.show && settings.dataLabelShow) {
                 label = element
-                            .append("text")
-                            .classed("const-label", true);
+                    .append("text")
+                    .classed("const-label", true);
 
                 label
                     .attr({
@@ -521,7 +576,7 @@ module powerbi.extensibility.visual {
                 format: "0"
             });
 
-            switch(settings.text) {
+            switch (settings.text) {
                 case Text.Name: {
                     return settings.name;
                 }
@@ -556,7 +611,7 @@ module powerbi.extensibility.visual {
 
             if (positionAcross <= minPosition) {
                 positionAcross = minPosition + marginAcross;
-            } else if(positionAcross >= maxPosition) {
+            } else if (positionAcross >= maxPosition) {
                 positionAcross = maxPosition - (textHeight + marginAcross);
             }
 
@@ -597,14 +652,14 @@ module powerbi.extensibility.visual {
             }
 
             if (settings.layoutMode === LayoutMode.Matrix) {
-                for (let j = 1; j < uniqueColumns.length; ++j) { 
+                for (let j = 1; j < uniqueColumns.length; ++j) {
                     let x = leftSpace + j * chartSize.width + this.gapBetweenCharts * j;
-    
+
                     let line = chartElement.append("line").style({
                         "stroke": "#aaa",
                         "stroke-width": 1
                     });
-    
+
                     line.attr({
                         x1: x,
                         x2: x,
@@ -612,15 +667,15 @@ module powerbi.extensibility.visual {
                         y2: topSpace + uniqueRows.length * chartSize.height + this.gapBetweenCharts * uniqueRows.length
                     });
                 }
-            }            
+            }
         }
 
-        public static renderSmallMultipleTitles(options: SmallMultipleOptions, settings: smallMultipleSettings) { 
+        public static renderSmallMultipleTitles(options: SmallMultipleOptions, settings: smallMultipleSettings) {
             let uniqueColumns: PrimitiveValue[] = options.columns,
                 uniqueRows: PrimitiveValue[] = options.rows,
                 chartSize: ISize = options.chartSize,
                 chartElement: d3.Selection<any> = options.chartElement,
-                leftSpace: number = options.leftSpace,                
+                leftSpace: number = options.leftSpace,
                 topSpace: number = options.topSpace,
                 fontSizeInPx: string = PixelConverter.fromPoint(settings.fontSize),
                 fontFamily: string = settings.fontFamily,
@@ -641,10 +696,10 @@ module powerbi.extensibility.visual {
                 let textProperties: TextProperties = {
                     fontFamily,
                     fontSize: fontSizeInPx
-                }        
+                }
 
                 topTitlestext
-                    .style({ 
+                    .style({
                         "text-anchor": "middle",
                         "font-size": fontSizeInPx,
                         "font-family": fontFamily,
@@ -657,12 +712,12 @@ module powerbi.extensibility.visual {
                         if (d || d === 0) {
                             textProperties.text = d.toString();
                             return TextMeasurementService.getTailoredTextOrDefault(textProperties, chartSize.width - 10);
-                        }         
-                        
+                        }
+
                         return null;
                     })
                     .call((text: d3.Selection<any>) => {
-                        for (let j = 0; j < uniqueColumns.length; ++j) { 
+                        for (let j = 0; j < uniqueColumns.length; ++j) {
                             const textSelectionX: d3.Selection<any> = d3.select(text[0][j]);
                             let x = leftSpace + j * chartSize.width + chartSize.width / 2 + this.gapBetweenCharts * j;
 
@@ -692,7 +747,7 @@ module powerbi.extensibility.visual {
                 .remove();
 
             leftTitlesText
-                .style({ 
+                .style({
                     "text-anchor": "middle",
                     "font-size": fontSizeInPx,
                     "font-family": fontFamily,
@@ -702,22 +757,22 @@ module powerbi.extensibility.visual {
                     if (d) {
                         textProperties.text = d && d.toString();
                         return TextMeasurementService.getTailoredTextOrDefault(textProperties, leftTitleSpace);
-                    }         
-                    
+                    }
+
                     return null;
                 })
                 .call((text: d3.Selection<any>) => {
-                    for (let i = 0; i < uniqueRows.length; ++i) { 
+                    for (let i = 0; i < uniqueRows.length; ++i) {
                         const textSelectionX: d3.Selection<any> = d3.select(text[0][i]);
                         let y = 0;
 
                         if (settings.layoutMode === LayoutMode.Flow) {
-                            
+
                             let previousChartGroupHeight: number = i * rowsInFlow * chartSize.height + this.gapBetweenCharts * i * rowsInFlow + topSpace * rowsInFlow * i;
                             y = previousChartGroupHeight + rowsInFlow * chartSize.height / 2 + topSpace;
                         } else {
                             y = i * chartSize.height + chartSize.height / 2 + topSpace * 2 + this.gapBetweenCharts * i;
-                        }                        
+                        }
 
                         textSelectionX.attr({
                             "transform": svg.translate(leftSpace / 2, y)
