@@ -1,8 +1,8 @@
 {
   "visual": {
-    "name": "stackedColumnChartByAkvelon",
-    "guid": "stackedColumnChartByAkvelonCC88FD95630A41AC8562F09033A48946",
-    "displayName": "Stacked Column Chart by Akvelon 1.2.4",
+    "name": "stackedColumnChartByAkvelonModifiedToShowPallets",
+    "guid": "stackedColumnChartByAkvelonModifiedToShowPalletsCC88FD95630A41AC8562F09033A48946",
+    "displayName": "Stacked Pallet Chart",
     "visualClassName": "Visual",
     "version": "1.2.4",
     "description": "Stacked Column Chart with rectangle selection support",
