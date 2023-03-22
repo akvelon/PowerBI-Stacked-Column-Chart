@@ -24,7 +24,7 @@ module powerbi.extensibility.visual.visualUtils {
         private lasso: Lasso = new Lasso();
         private lassoElement: LassoElement;
 
-        private svgChart: d3.Selection<any>;
+        private svgChart: d3Selection<any>;
         private domItems = new DomItems();
 
         private preselection: Preselection = new Preselection();
@@ -38,13 +38,13 @@ module powerbi.extensibility.visual.visualUtils {
             this.visual = visual;
         }
 
-        init(mainElement: d3.Selection<HTMLElement>): void {
+        init(mainElement: d3Selection<HTMLElement>): void {
 
-            const rectangleElement: d3.Selection<any> = mainElement.append('div').classed(Constants.RectClass, true).classed(Constants.RectAdditionalClass, true);
+            const rectangleElement: d3Selection<any> = mainElement.append('div').classed(Constants.RectClass, true).classed(Constants.RectAdditionalClass, true);
             this.lassoElement = new LassoElement(rectangleElement);
         }
 
-        update(svgChart: d3.Selection<any>, bars: d3.Selection<any>, legendBucketFilled: boolean): void {
+        update(svgChart: d3Selection<any>, bars: d3Selection<any>, legendBucketFilled: boolean): void {
             this.svgChart = svgChart;
             this.domItems.update(bars);
             this.legendBucketFilled = legendBucketFilled;
@@ -112,7 +112,7 @@ module powerbi.extensibility.visual.visualUtils {
         }
 
         private onClick(): void {
-            const target: d3.Selection<any> = d3.select(this.lasso.mousedown.target);
+            const target: d3Selection<any> = d3.select(this.lasso.mousedown.target);
 
             // a click on an empty space
             if ( !target.classed(this.barClassName) ){
@@ -164,7 +164,7 @@ module powerbi.extensibility.visual.visualUtils {
         }
 
         private performSelection(): void {
-            const bars: d3.Selection<any> = this.domItems.get();
+            const bars: d3Selection<any> = this.domItems.get();
 
             let handledDataPoints: VisualDataPoint[] = [];
             let selectedDataPoints: VisualDataPoint[] = [];
@@ -202,7 +202,7 @@ module powerbi.extensibility.visual.visualUtils {
             this.action = null;
         }
 
-        updatePreselectionData(selectionService: Lasso, bars: d3.Selection<any>, ctrlKey: boolean): void {
+        updatePreselectionData(selectionService: Lasso, bars: d3Selection<any>, ctrlKey: boolean): void {
             const self: Preselection = this;
             
             if ( !ctrlKey ) {
@@ -230,9 +230,9 @@ module powerbi.extensibility.visual.visualUtils {
             });
         }
 
-        preSelectEntireCategories(svgChart: d3.Selection<any>): void {
+        preSelectEntireCategories(svgChart: d3Selection<any>): void {
             svgChart.selectAll('.bar-group').each(function(){
-                const bars: d3.Selection<any> = d3.select(this).selectAll('.bar');
+                const bars: d3Selection<any> = d3.select(this).selectAll('.bar');
                 
                 const preSelectedCategories: PrimitiveValue[] = [];
                 const preRemovedCategories: PrimitiveValue[] = [];
@@ -257,13 +257,13 @@ module powerbi.extensibility.visual.visualUtils {
     }
 
     class DomItems {
-        private bars: d3.Selection<any>;
+        private bars: d3Selection<any>;
 
-        update(bars: d3.Selection<any>): void {
+        update(bars: d3Selection<any>): void {
             this.bars = bars;
         }
 
-        get(): d3.Selection<any> {
+        get(): d3Selection<any> {
             return this.bars;
         }
 
@@ -279,7 +279,7 @@ module powerbi.extensibility.visual.visualUtils {
         }
 
         countPreselectedOrSelected(): number {
-            const preselected: d3.Selection<any> = this.bars.filter((d: VisualDataPoint) =>
+            const preselected: d3Selection<any> = this.bars.filter((d: VisualDataPoint) =>
                 DomItems.dataPointIsPartOfSelection(d)
             );
 
@@ -413,10 +413,10 @@ module powerbi.extensibility.visual.visualUtils {
     }
 
     class LassoElement {
-        private d3_element: d3.Selection<any>;
+        private d3_element: d3Selection<any>;
         private element: HTMLElement;
         
-        constructor(d3_element: d3.Selection<any>){
+        constructor(d3_element: d3Selection<any>){
             this.d3_element = d3_element;
             this.element = d3_element.node() as HTMLElement;
         }

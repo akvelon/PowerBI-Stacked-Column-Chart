@@ -69,18 +69,18 @@ module powerbi.extensibility.visual {
 
         public webBehaviorSelectionHandler: ISelectionHandler;
 
-        private mainSvgElement: d3.Selection<SVGElement>;
-        private mainGElement: d3.Selection<SVGElement>;
-        private xAxisSvgGroup: d3.Selection<SVGElement>;
-        private yAxisSvgGroup: d3.Selection<SVGElement>;
-        private axisGraphicsContext: d3.Selection<SVGElement>;
-        private axisLabelsGroup: d3.selection.Update<string>;
-        private legendElement: d3.Selection<SVGElement>;
-        private legendElementRoot: d3.Selection<SVGElement>;
+        private mainSvgElement: d3Selection<SVGElement>;
+        private mainGElement: d3Selection<SVGElement>;
+        private xAxisSvgGroup: d3Selection<SVGElement>;
+        private yAxisSvgGroup: d3Selection<SVGElement>;
+        private axisGraphicsContext: d3Selection<SVGElement>;
+        private axisLabelsGroup: d3Selection.Update<string>;
+        private legendElement: d3Selection<SVGElement>;
+        private legendElementRoot: d3Selection<SVGElement>;
 
         public readonly barClassName: string = Selectors.BarSelect.className;
-        private labelGraphicsContext: d3.Selection<any>;
-        private labelBackgroundContext: d3.Selection<any>;
+        private labelGraphicsContext: d3Selection<any>;
+        private labelBackgroundContext: d3Selection<any>;
 
         public scrollBar: visualUtils.ScrollBar = new visualUtils.ScrollBar(this);
 
@@ -107,7 +107,7 @@ module powerbi.extensibility.visual {
         private behavior: IInteractiveBehavior;
         private interactivityService: IInteractivityService;
 
-        private clearCatcher: d3.Selection<any>;
+        private clearCatcher: d3Selection<any>;
         private tooltipServiceWrapper: ITooltipServiceWrapper;
 
         private legendProperties: LegendProperties;
@@ -127,11 +127,11 @@ module powerbi.extensibility.visual {
         private dataPointsByCategories: CategoryDataPoints[];
 
         // adding small multiple
-        private mainElement: d3.Selection<any>;
+        private mainElement: d3Selection<any>;
         private mainHtmlElement: HTMLElement;
-        private mainDivElement: d3.Selection<any>;
-        private chartsContainer: d3.Selection<SVGElement>;
-        private barGroup: d3.Selection<SVGElement>;
+        private mainDivElement: d3Selection<any>;
+        private chartsContainer: d3Selection<SVGElement>;
+        private barGroup: d3Selection<SVGElement>;
         public maxYLabelsWidth: number;
         public readonly axesSize: IAxesSize = {xAxisHeight: 10, yAxisWidth: 15};
 
@@ -471,7 +471,7 @@ module powerbi.extensibility.visual {
             return -1;
         }
 
-        public prepareMainDiv(el: d3.Selection<any>) {
+        public prepareMainDiv(el: d3Selection<any>) {
             if ( this.mainSvgElement ){
                 this.mainSvgElement.remove();
                 this.mainSvgElement = null;
@@ -555,7 +555,7 @@ module powerbi.extensibility.visual {
             return axes;
         }
 
-        private renderSmallMultipleAxes(dataPoints: VisualDataPoint[], axes: IAxes, xAxisSvgGroup: d3.Selection<SVGElement>, yAxisSvgGroup: d3.Selection<SVGElement>, barHeight: number): void {
+        private renderSmallMultipleAxes(dataPoints: VisualDataPoint[], axes: IAxes, xAxisSvgGroup: d3Selection<SVGElement>, yAxisSvgGroup: d3Selection<SVGElement>, barHeight: number): void {
             visualUtils.calculateBarCoordianates(dataPoints, axes, this.settings, barHeight, true);
 
             RenderAxes.render(
@@ -740,8 +740,8 @@ module powerbi.extensibility.visual {
                             transform: svg.translate(leftSpace + leftMove, topMove + topSpace)
                         });
 
-                    let xAxisSvgGroup: d3.Selection<SVGElement> = chart.append("g");
-                    let yAxisSvgGroup: d3.Selection<SVGElement> = chart.append("g");
+                    let xAxisSvgGroup: d3Selection<SVGElement> = chart.append("g");
+                    let yAxisSvgGroup: d3Selection<SVGElement> = chart.append("g");
 
                     let yHasRightPosition: boolean = this.settings.valueAxis.show && this.settings.valueAxis.position === "right";
 
@@ -1241,7 +1241,7 @@ module powerbi.extensibility.visual {
             RenderVisual.renderConstantLine(this.settings.constantLine, this.barGroup, this.data.axes, xWidth);
         }
 
-        private calculateLegendSize(settings: legendSettings, legendElementRoot: d3.Selection<SVGElement>): LegendSize {
+        private calculateLegendSize(settings: legendSettings, legendElementRoot: d3Selection<SVGElement>): LegendSize {
             // if 'width' or 'height' is '0' it means that we don't need that measure for our calculations
             switch (settings.position) {
                 case 'Top': case 'TopCenter':
@@ -1328,8 +1328,8 @@ module powerbi.extensibility.visual {
         }
 
         private calculateOffsets() {
-            let xtickText: d3.selection.Group = this.xAxisSvgGroup.selectAll("text")[0];
-            let ytickText: d3.selection.Group = this.yAxisSvgGroup.selectAll("text")[0];
+            let xtickText: d3Selection.Group = this.xAxisSvgGroup.selectAll("text")[0];
+            let ytickText: d3Selection.Group = this.yAxisSvgGroup.selectAll("text")[0];
 
             let showXAxisTitle: boolean = this.settings.categoryAxis.show && this.settings.categoryAxis.showTitle;
             let showYAxisTitle: boolean = this.settings.valueAxis.show && this.settings.valueAxis.showTitle;

@@ -11,7 +11,7 @@ module powerbi.extensibility.visual.visualUtils {
         action: string;
         active: boolean;
         mousemoved: boolean;
-        rect?: d3.Selection<HTMLElement>;
+        rect?: d3Selection<HTMLElement>;
         rect_node?: HTMLElement;
         startX?: number;
         startY?: number;
@@ -44,7 +44,7 @@ module powerbi.extensibility.visual.visualUtils {
             this.visual = visual;
         }
 
-        init(mainElement: d3.Selection<HTMLElement>): void {
+        init(mainElement: d3Selection<HTMLElement>): void {
             if ( !this.selection.rect ){
                 this.selection.rect = mainElement.append('div').classed('selection-rect', true).classed('selection-rect-normal-chart', true);
                 this.selection.rect_node = this.selection.rect.node() as HTMLElement;
@@ -56,7 +56,7 @@ module powerbi.extensibility.visual.visualUtils {
                 .on('mouseup.selection', () => { this.onMouseup(); });
         }
 
-        update<Datum>(bars: d3.Selection<any>): void {
+        update<Datum>(bars: d3Selection<any>): void {
             this.visibleBars = [];
             let barsArray = this.visibleBars;
             bars.each(function (datum: Datum, index: number, outerIndex: number) {
@@ -288,7 +288,7 @@ module powerbi.extensibility.visual.visualUtils {
             } else {
                 for (let i: number = 0; i < this.visibleBars.length; i++) {
                     let bar: HTMLElement = this.visibleBars[i];
-                    let d3_bar: d3.Selection<SVGRectElement> = d3.select(bar);
+                    let d3_bar: d3Selection<SVGRectElement> = d3.select(bar);
                     if (
                         this.selectionStates[i + scrollIndex] === 'selected'
                         || this.selectionStates[i + scrollIndex] === 'justSelected'

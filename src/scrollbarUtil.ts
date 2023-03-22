@@ -18,7 +18,7 @@ module powerbi.extensibility.visual.visualUtils {
         currentPosition: number;
     }
     interface Track {
-        el: d3.Selection<HTMLElement>;
+        el: d3Selection<HTMLElement>;
         left: number;
         top: number;
         width: number;
@@ -49,8 +49,8 @@ module powerbi.extensibility.visual.visualUtils {
         private visibleDataPointsByCategories: CategoryDataPoints[];
         // Maximum of bars that can appear at the same time
         private capacity: number;
-        private htmlElement: d3.Selection<HTMLElement>;
-        private mainElement: d3.Selection<HTMLElement>;
+        private htmlElement: d3Selection<HTMLElement>;
+        private mainElement: d3Selection<HTMLElement>;
         private track: Track = {
             el: null,
             left: 0,
@@ -59,13 +59,13 @@ module powerbi.extensibility.visual.visualUtils {
             height: 0,
             availableScrollDistance: 1 // Must not be 0 because appears as the denominator
         };
-        private handle: d3.Selection<HTMLElement>;
+        private handle: d3Selection<HTMLElement>;
 
         constructor(visual: Visual) {
             this.visual = visual;
         }
 
-        init(mainElement: d3.Selection<HTMLElement>): void {
+        init(mainElement: d3Selection<HTMLElement>): void {
             this.htmlElement = d3.select('html');
             this.mainElement = mainElement;
             this.track.el = this.mainElement.append('div').classed('scrollbar-track', true);

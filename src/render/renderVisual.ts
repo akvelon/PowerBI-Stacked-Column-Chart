@@ -5,7 +5,7 @@ module powerbi.extensibility.visual {
     import IInteractivityService = powerbi.extensibility.utils.interactivity.IInteractivityService;
     import TooltipEventArgs = powerbi.extensibility.utils.tooltip.TooltipEventArgs;
     import ITooltipServiceWrapper = powerbi.extensibility.utils.tooltip.ITooltipServiceWrapper;
-    import UpdateSelection = d3.selection.Update;
+    import UpdateSelection = d3Selection.Update;
     import dataLabelUtils = powerbi.extensibility.utils.chart.dataLabel.utils;
     import PixelConverter = powerbi.extensibility.utils.type.PixelConverter;
     import ValueFormatter = powerbi.extensibility.utils.formatting.valueFormatter;
@@ -27,8 +27,8 @@ module powerbi.extensibility.visual {
 
         public static render(
             data: VisualData,
-            visualSvgGroup: d3.Selection<SVGElement>,
-            clearCatcher: d3.Selection<any>,
+            visualSvgGroup: d3Selection<SVGElement>,
+            clearCatcher: d3Selection<any>,
             visualInteractivityService: IInteractivityService,
             visualBehavior: IInteractiveBehavior,
             tooltipServiceWrapper: ITooltipServiceWrapper,
@@ -135,7 +135,7 @@ module powerbi.extensibility.visual {
         public static renderDataLabelsBackground(
             dataPoints: VisualDataPoint[],
             settings: VisualSettings,
-            dataLabelsBackgroundContext: d3.Selection<any>): void {
+            dataLabelsBackgroundContext: d3Selection<any>): void {
 
             let labelSettings: categoryLabelsSettings = settings.categoryLabels;
             let isHorizontal: boolean = labelSettings.orientation === LabelOrientation.Horizontal;
@@ -186,7 +186,7 @@ module powerbi.extensibility.visual {
         public static renderDataLabelsBackgroundForSmallMultiple(
             data: VisualData,
             settings: VisualSettings,
-            dataLabelsBackgroundContext: d3.Selection<any>,
+            dataLabelsBackgroundContext: d3Selection<any>,
             dataPoints: VisualDataPoint[] = null): void {
 
             let labelSettings: categoryLabelsSettings = settings.categoryLabels;
@@ -239,7 +239,7 @@ module powerbi.extensibility.visual {
             dataPoints: VisualDataPoint[],
             dataLabelFormatter: IValueFormatter,
             settings: VisualSettings,
-            dataLabelsContext: d3.Selection<any>): void {
+            dataLabelsContext: d3Selection<any>): void {
 
             let labelSettings: categoryLabelsSettings = settings.categoryLabels;
 
@@ -282,7 +282,7 @@ module powerbi.extensibility.visual {
         public static renderDataLabelsForSmallMultiple(
             data: VisualData,
             settings: VisualSettings,
-            dataLabelsContext: d3.Selection<any>,
+            dataLabelsContext: d3Selection<any>,
             metadata: VisualMeasureMetadata,
             dataPoints: VisualDataPoint[] = null): void {
 
@@ -335,15 +335,15 @@ module powerbi.extensibility.visual {
             let uniqueColumns: PrimitiveValue[] = options.columns,
                 index: number = options.index,
                 chartSize: ISize = options.chartSize,
-                chartElement: d3.Selection<any> = options.chartElement,
+                chartElement: d3Selection<any> = options.chartElement,
                 leftSpace: number = options.leftSpace,
                 topSpace: number = options.topSpace,
                 textHeight: number = options.textHeight,
                 fontSizeInPx: string = PixelConverter.fromPoint(settings.fontSize),
                 fontFamily: string = settings.fontFamily;
 
-            let topTitles: d3.Selection<SVGElement> = chartElement.append("svg");
-            let topTitlestext: d3.selection.Update<PrimitiveValue> = topTitles.selectAll("*").data([uniqueColumns[index]]);
+            let topTitles: d3Selection<SVGElement> = chartElement.append("svg");
+            let topTitlestext: d3Selection.Update<PrimitiveValue> = topTitles.selectAll("*").data([uniqueColumns[index]]);
 
             topTitlestext.enter()
                 .append("text")
@@ -376,8 +376,8 @@ module powerbi.extensibility.visual {
                     
                     return null;
                 })
-                .call((text: d3.Selection<any>) => {
-                    const textSelectionX: d3.Selection<any> = d3.select(text[0][0]);
+                .call((text: d3Selection<any>) => {
+                    const textSelectionX: d3Selection<any> = d3.select(text[0][0]);
                     let x = leftSpace + chartSize.width / 2;
 
                     textSelectionX.attr({
@@ -416,7 +416,7 @@ module powerbi.extensibility.visual {
             return filteredDatapoints;
         }
 
-        public static renderTooltip(selection: d3.selection.Update<any>, tooltipServiceWrapper: ITooltipServiceWrapper): void {
+        public static renderTooltip(selection: d3Selection.Update<any>, tooltipServiceWrapper: ITooltipServiceWrapper): void {
             tooltipServiceWrapper.addTooltip(
                 selection,
                 (tooltipEvent: TooltipEventArgs<VisualDataPoint>) => {
@@ -426,8 +426,8 @@ module powerbi.extensibility.visual {
                 true);
         }
 
-        public static renderConstantLine(settings: constantLineSettings, element: d3.Selection<SVGElement>, axes: IAxes, width: number) {
-            let line: d3.Selection<any> = element.select(".const-line");
+        public static renderConstantLine(settings: constantLineSettings, element: d3Selection<SVGElement>, axes: IAxes, width: number) {
+            let line: d3Selection<any> = element.select(".const-line");
 
             let yValue: number = settings.value;
 
@@ -484,7 +484,7 @@ module powerbi.extensibility.visual {
             let textWidth: number = TextMeasurementService.measureSvgTextWidth(textProperties, text);
             let textHeight: number = TextMeasurementService.estimateSvgTextHeight(textProperties);
 
-            let label: d3.Selection<any> = element.select(".const-label");
+            let label: d3Selection<any> = element.select(".const-label");
 
             if (label[0][0]) {
                 element.selectAll("text").remove();
@@ -570,7 +570,7 @@ module powerbi.extensibility.visual {
             let uniqueRows: PrimitiveValue[] = options.rows,
                 uniqueColumns: PrimitiveValue[] = options.columns,
                 chartSize: ISize = options.chartSize,
-                chartElement: d3.Selection<any> = options.chartElement,
+                chartElement: d3Selection<any> = options.chartElement,
                 leftSpace: number = options.leftSpace,
                 topSpace: number = options.topSpace,
                 rowsInFlow: number = options.rowsInFlow;
@@ -619,7 +619,7 @@ module powerbi.extensibility.visual {
             let uniqueColumns: PrimitiveValue[] = options.columns,
                 uniqueRows: PrimitiveValue[] = options.rows,
                 chartSize: ISize = options.chartSize,
-                chartElement: d3.Selection<any> = options.chartElement,
+                chartElement: d3Selection<any> = options.chartElement,
                 leftSpace: number = options.leftSpace,                
                 topSpace: number = options.topSpace,
                 fontSizeInPx: string = PixelConverter.fromPoint(settings.fontSize),
@@ -627,8 +627,8 @@ module powerbi.extensibility.visual {
                 rowsInFlow: number = options.rowsInFlow;
 
             if (settings.layoutMode === LayoutMode.Matrix) {
-                let topTitles: d3.Selection<SVGElement> = chartElement.append("svg");
-                let topTitlestext: d3.selection.Update<PrimitiveValue> = topTitles.selectAll("*").data(uniqueColumns);
+                let topTitles: d3Selection<SVGElement> = chartElement.append("svg");
+                let topTitlestext: d3Selection.Update<PrimitiveValue> = topTitles.selectAll("*").data(uniqueColumns);
 
                 topTitlestext.enter()
                     .append("text")
@@ -661,9 +661,9 @@ module powerbi.extensibility.visual {
                         
                         return null;
                     })
-                    .call((text: d3.Selection<any>) => {
+                    .call((text: d3Selection<any>) => {
                         for (let j = 0; j < uniqueColumns.length; ++j) { 
-                            const textSelectionX: d3.Selection<any> = d3.select(text[0][j]);
+                            const textSelectionX: d3Selection<any> = d3.select(text[0][j]);
                             let x = leftSpace + j * chartSize.width + chartSize.width / 2 + this.gapBetweenCharts * j;
 
                             textSelectionX.attr({
@@ -680,8 +680,8 @@ module powerbi.extensibility.visual {
                 fontSize: fontSizeInPx
             }
 
-            let leftTitles: d3.Selection<SVGElement> = chartElement.append("svg");
-            let leftTitlesText: d3.selection.Update<PrimitiveValue> = leftTitles.selectAll("*").data(uniqueRows);
+            let leftTitles: d3Selection<SVGElement> = chartElement.append("svg");
+            let leftTitlesText: d3Selection.Update<PrimitiveValue> = leftTitles.selectAll("*").data(uniqueRows);
 
             leftTitlesText.enter()
                 .append("text")
@@ -706,9 +706,9 @@ module powerbi.extensibility.visual {
                     
                     return null;
                 })
-                .call((text: d3.Selection<any>) => {
+                .call((text: d3Selection<any>) => {
                     for (let i = 0; i < uniqueRows.length; ++i) { 
-                        const textSelectionX: d3.Selection<any> = d3.select(text[0][i]);
+                        const textSelectionX: d3Selection<any> = d3.select(text[0][i]);
                         let y = 0;
 
                         if (settings.layoutMode === LayoutMode.Flow) {

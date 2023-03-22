@@ -32,9 +32,9 @@ module powerbi.extensibility.visual {
     import LegendDataPoint = powerbi.extensibility.utils.chart.legend.LegendDataPoint;
 
     export interface LegendBehaviorOptions {
-        legendItems: d3.Selection<any>;
-        legendIcons: d3.Selection<any>;
-        clearCatcher: d3.Selection<any>;
+        legendItems: d3Selection<any>;
+        legendIcons: d3Selection<any>;
+        clearCatcher: d3Selection<any>;
     }
 
     export class CustomLegendBehavior implements IInteractiveBehavior {

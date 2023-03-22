@@ -154,7 +154,7 @@ module powerbi.extensibility.visual.legendUtils {
 
     export function renderLegend(
         visualLegend: ILegend,
-        svg: d3.Selection<SVGElement>,
+        svg: d3Selection<SVGElement>,
         viewport: IViewport,
         legendProperties: LegendProperties,
         legendElement): void {

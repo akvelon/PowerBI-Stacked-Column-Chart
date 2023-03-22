@@ -311,7 +311,7 @@ module powerbi.extensibility.visual.visualUtils {
         return thickness;
     }
 
-    export function getLabelsMaxWidth(group: d3.selection.Group): number {
+    export function getLabelsMaxWidth(group: d3Selection.Group): number {
         const widths: Array<number> = [];
 
         group.forEach((item: any) => {
@@ -326,7 +326,7 @@ module powerbi.extensibility.visual.visualUtils {
         return d3.max(widths);
     }
 
-    export function getLabelsMaxHeight(group: d3.selection.Group): number {
+    export function getLabelsMaxHeight(group: d3Selection.Group): number {
         const heights: Array<number> = [];
 
         group.forEach((item: any) => {
@@ -366,7 +366,7 @@ module powerbi.extensibility.visual.visualUtils {
     }
 
     export function smallMultipleLabelRotationIsNeeded(
-        xAxisSvgGroup: d3.Selection<any>,
+        xAxisSvgGroup: d3Selection<any>,
         barHeight: number,
         categoryAxisSettings: categoryAxisSettings,
         maxLabelHeight: number

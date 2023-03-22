@@ -163,7 +163,7 @@ module powerbi.extensibility.visual {
         leftSpace: number,
         topSpace: number,
         textHeight?: number,
-        chartElement: d3.Selection<any>,
+        chartElement: d3Selection<any>,
         xAxisLabelSize: number,
         index?: number,
         rowsInFlow?: number

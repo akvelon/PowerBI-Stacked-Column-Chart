@@ -26,7 +26,7 @@
 
 module powerbi.extensibility.visual {
     // d3
-    import Selection = d3.Selection;
+    import Selection = d3Selection;
 
     // powerbi.visuals
     import IInteractiveBehavior = powerbi.extensibility.utils.interactivity.IInteractiveBehavior;
