@@ -1,42 +1,50 @@
-module powerbi.extensibility.visual.formattingUtils {
-    import ValueFormatter = powerbi.extensibility.utils.formatting.valueFormatter;
-    import PixelConverter = powerbi.extensibility.utils.type.PixelConverter;
-    import dataLabelUtils = powerbi.extensibility.utils.chart.dataLabel.utils;
-    import TextProperties = powerbi.extensibility.utils.formatting.TextProperties;
+"use strict";
 
-    export function getFormatStringByColumn(column: DataViewMetadataColumn) {
-        return !column.format && column.type.numeric ? "0.00" : ValueFormatter.getFormatStringByColumn(column);
-    }
+import powerbiApi from "powerbi-visuals-api";
+import { categoryLabelsSettings } from "../settings";
+import { VisualData } from "../visualInterfaces";
+import DataViewMetadataColumn = powerbiApi.DataViewMetadataColumn;
 
-    export function createFormatter(displayUnits: number, precision: number, column: DataViewMetadataColumn, value: number) {
-        return ValueFormatter.create({
-            value: displayUnits === 0 && value ? value : displayUnits,
-            value2: 0,
-            precision: precision,
-            format: this.getFormatStringByColumn(column)
-        });
-    }
+import { interfaces, valueFormatter as ValueFormatter} from "powerbi-visuals-utils-formattingutils";
+import TextProperties = interfaces.TextProperties;
 
-    export function getValueForFormatter(data: VisualData) {
-        return data.axes.x.axis.tickValues()[1];
-    }
+import { pixelConverter as PixelConverter} from "powerbi-visuals-utils-typeutils";
 
-    export function getTextProperties(settings: categoryLabelsSettings): TextProperties {
-        let fontSizeInPx: string = PixelConverter.fromPoint(settings.fontSize);
-        let fontFamily: string = settings.fontFamily ? settings.fontFamily : dataLabelUtils.LabelTextProperties.fontFamily;
+import { dataLabelUtils } from "powerbi-visuals-utils-chartutils";
 
-        return {
-            fontSize: fontSizeInPx.toString(),
-            fontFamily: fontFamily
-        };
-    }
 
-    export function getTextPropertiesForHeightCalculation(settings: categoryLabelsSettings): TextProperties  {
-        let fontFamily: string = settings.fontFamily ? settings.fontFamily : dataLabelUtils.LabelTextProperties.fontFamily;
+export function getFormatStringByColumn(column: DataViewMetadataColumn) {
+    return !column.format && column.type.numeric ? "0.00" : ValueFormatter.getFormatStringByColumn(<any>column);
+}
 
-        return  {
-            fontSize: settings.fontSize.toString(),
-            fontFamily: fontFamily
-        };
-    }
+export function createFormatter(displayUnits: number, precision: number, column: DataViewMetadataColumn, value: number) {
+    return ValueFormatter.create({
+        value: displayUnits === 0 && value ? value : displayUnits,
+        value2: 0,
+        precision: precision,
+        format: this.getFormatStringByColumn(column)
+    });
+}
+
+export function getValueForFormatter(data: VisualData) {
+    return data.axes.x.axis.tickValues()[1];
+}
+
+export function getTextProperties(settings: categoryLabelsSettings): TextProperties {
+    const fontSizeInPx: string = PixelConverter.fromPoint(settings.fontSize);
+    const fontFamily: string = settings.fontFamily ? settings.fontFamily : dataLabelUtils.LabelTextProperties.fontFamily;
+
+    return {
+        fontSize: fontSizeInPx.toString(),
+        fontFamily: fontFamily
+    };
+}
+
+export function getTextPropertiesForHeightCalculation(settings: categoryLabelsSettings): TextProperties  {
+    const fontFamily: string = settings.fontFamily ? settings.fontFamily : dataLabelUtils.LabelTextProperties.fontFamily;
+
+    return  {
+        fontSize: settings.fontSize.toString(),
+        fontFamily: fontFamily
+    };
 }
