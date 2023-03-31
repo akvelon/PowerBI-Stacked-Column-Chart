@@ -330,14 +330,14 @@ export class RenderAxes {
         axisLabelsGroup = axisGraphicsContext.selectAll("*")
             .data(axisLabelsData);
 
-        // When a new category added, create a new SVG group for it.
-        axisLabelsGroup.enter()
-            .append("text")
-            .attr("class", Selectors.AxisLabelSelector.className);
-
         // For removed categories, remove the SVG group.
         axisLabelsGroup.exit()
             .remove();
+
+        // When a new category added, create a new SVG group for it.
+        const axisLabelsGroupEnter = axisLabelsGroup.enter()
+            .append("text")
+            .attr("class", Selectors.AxisLabelSelector.className);
 
         const xColor: string = settings.categoryAxis.axisTitleColor;
         const xFontSize: number = PixelConverter.fromPointToPixel(settings.categoryAxis.titleFontSize);
@@ -354,6 +354,7 @@ export class RenderAxes {
         const yAxisFontFamily: string = settings.valueAxis.titleFontFamily;
 
         axisLabelsGroup
+            .merge(axisLabelsGroupEnter)
             .style( "text-anchor", "middle")
             .text(d => d)
             .call((text: d3Selection<any>) => {

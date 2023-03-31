@@ -58,20 +58,21 @@ export class RenderVisual {
         settings: VisualSettings) {
         // Select all bar groups in our chart and bind them to our categories.
         // Each group will contain a set of bars, one for each of the values in category.
-        const barGroupSelect = visualSvgGroup.selectAll(Selectors.BarGroupSelect.selectorName)
+        let barGroupSelect = visualSvgGroup.selectAll(Selectors.BarGroupSelect.selectorName)
             .data([data.dataPoints]);
-
-        // When a new category added, create a new SVG group for it.
-        barGroupSelect.enter()
-            .append("g")
-            .attr("class", Selectors.BarGroupSelect.className);
 
         // For removed categories, remove the SVG group.
         barGroupSelect.exit()
             .remove();
 
+
+        // When a new category added, create a new SVG group for it.
+        const barGroupSelectEnter = barGroupSelect.enter()
+            .append("g")
+            .attr("class", Selectors.BarGroupSelect.className);
         // Update the position of existing SVG groups.
         // barGroupSelect.attr("transform", d => `translate(0, ${data.axes.y(d.category)})`);
+        barGroupSelect = barGroupSelect.merge(barGroupSelectEnter)
 
         // Now we bind each SVG group to the values in corresponding category.
         // To keep the length of the values array, we transform each value into object,
@@ -80,15 +81,19 @@ export class RenderVisual {
             .selectAll(Selectors.BarSelect.selectorName)
             .data(data.dataPoints);
 
-        // For each new value, we create a new rectange.
-        barSelect.enter().append("rect")
-            .attr("class", Selectors.BarSelect.className);
-
         // Remove rectangles, that no longer have matching values.
         barSelect.exit()
             .remove();
 
+        // For each new value, we create a new rectange.
+        const barSelectEnter = barSelect.enter().append("rect")
+            .attr("class", Selectors.BarSelect.className);
+
+        const interactivityService = visualInteractivityService,
+        hasSelection: boolean = interactivityService.hasSelection();
+
         barSelect
+            .merge(barSelectEnter)
             .attr("height", d => {
                 return d.barCoordinates.height;
             })
@@ -102,11 +107,6 @@ export class RenderVisual {
                 return d.barCoordinates.y;
             })
             .attr("fill", d => d.color)
-
-        const interactivityService = visualInteractivityService,
-            hasSelection: boolean = interactivityService.hasSelection();
-
-        barSelect
             .style("fill-opacity", (p: VisualDataPoint) => visualUtils.getFillOpacity(
                 p.selected,
                 p.highlight,
@@ -355,13 +355,13 @@ export class RenderVisual {
         const topTitles: d3Selection<SVGElement> = chartElement.append("svg");
         const topTitlestext: d3Update<PrimitiveValue> = topTitles.selectAll("*").data([uniqueColumns[index]]);
 
-        topTitlestext.enter()
-            .append("text")
-            .attr("class", Selectors.AxisLabelSelector.className);
-
         // For removed categories, remove the SVG group.
         topTitlestext.exit()
             .remove();
+
+        const topTitlestextEnter = topTitlestext.enter()
+            .append("text")
+            .attr("class", Selectors.AxisLabelSelector.className);
 
         const textProperties: TextProperties = {
             fontFamily,
@@ -369,6 +369,7 @@ export class RenderVisual {
         }
 
         topTitlestext
+            .merge(topTitlestextEnter)
             .style("text-anchor", "middle")
             .style("font-size", fontSizeInPx)
             .style("font-family", fontFamily)
@@ -621,20 +622,21 @@ export class RenderVisual {
             const topTitles: d3Selection<SVGElement> = chartElement.append("svg");
             const topTitlestext: d3Update<PrimitiveValue> = topTitles.selectAll("*").data(uniqueColumns);
 
-            topTitlestext.enter()
-                .append("text")
-                .attr("class", Selectors.AxisLabelSelector.className);
-
             // For removed categories, remove the SVG group.
             topTitlestext.exit()
                 .remove();
 
+            const topTitlestextEnter = topTitlestext.enter()
+                .append("text")
+                .attr("class", Selectors.AxisLabelSelector.className);
+            
             const textProperties: TextProperties = {
                 fontFamily,
                 fontSize: fontSizeInPx
             }        
 
             topTitlestext
+                .merge(topTitlestextEnter)
                 .style("text-anchor", "middle",)
                 .style("font-size", fontSizeInPx,)
                 .style("font-family", fontFamily,)
@@ -668,15 +670,16 @@ export class RenderVisual {
         const leftTitles: d3Selection<SVGElement> = chartElement.append("svg");
         const leftTitlesText: d3Update<PrimitiveValue> = leftTitles.selectAll("*").data(uniqueRows);
 
-        leftTitlesText.enter()
-            .append("text")
-            .attr("class", Selectors.AxisLabelSelector.className);
-
         // For removed categories, remove the SVG group.
         leftTitlesText.exit()
             .remove();
 
+        const leftTitlesTextEnter = leftTitlesText.enter()
+            .append("text")
+            .attr("class", Selectors.AxisLabelSelector.className);
+
         leftTitlesText
+            .merge(leftTitlesTextEnter)
             .style("text-anchor", "middle")
             .style("font-size", fontSizeInPx)
             .style("font-family", fontFamily)
