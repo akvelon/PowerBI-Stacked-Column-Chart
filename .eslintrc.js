@@ -1,20 +1,20 @@
 module.exports = {
     env: {
-        "browser": true,
-        "es6": true,
-        "es2017": true
+        'browser': true,
+        'es6': true,
+        'es2017': true,
     },
     root: true,
-    parser: "@typescript-eslint/parser",
+    parser: '@typescript-eslint/parser',
     parserOptions: {
-        project: "tsconfig.json",
-        tsconfigRootDir: ".",
+        project: 'tsconfig.json',
+        tsconfigRootDir: '.',
     },
     plugins: [
-        "powerbi-visuals"
+        'powerbi-visuals',
     ],
     extends: [
-        "plugin:powerbi-visuals/recommended"
+        'plugin:powerbi-visuals/recommended',
     ],
-    rules: {}
+    rules: {},
 };

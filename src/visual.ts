@@ -183,9 +183,9 @@ export class Visual implements IVisual {
             null,
             customLegendBehavior
         );
-        
+
         this.behavior = new WebBehavior(this);
-        
+
         this.legendElementRoot = this.mainElement.selectAll("svg.legend");
         this.legendElement = this.mainElement.selectAll("svg.legend").selectAll("g");
     }
@@ -195,7 +195,7 @@ export class Visual implements IVisual {
             .filter(d => d.selected)
 
         const data: any[] = selected.data();
-        
+
         selectionSaveUtils.saveSelection(data, this.host);
     }
 
@@ -210,7 +210,7 @@ export class Visual implements IVisual {
             this.legendElement && this.legendElement.selectAll("*").remove();
             this.labelGraphicsContext && this.labelGraphicsContext.selectAll("*").remove();
             this.labelBackgroundContext && this.labelBackgroundContext.selectAll("*").remove();
-        }            
+        }
     }
 
     private optionsAreValid(options: VisualUpdateOptions) {
@@ -236,7 +236,7 @@ export class Visual implements IVisual {
         this.maxXLabelsWidth = null;
         this.dataPointsByCategories = this.buildDataPointsByCategoriesArray();
 
-        this.hasHighlight = this.allDataPoints.filter(x => x.highlight).length > 0;                
+        this.hasHighlight = this.allDataPoints.filter(x => x.highlight).length > 0;
 
         this.categoriesCount = this.dataPointsByCategories.length;
 
@@ -244,7 +244,7 @@ export class Visual implements IVisual {
 
         this.lassoSelection.init(this.mainElement);
 
-        if (this.isLegendNeeded) {                
+        if (this.isLegendNeeded) {
             legendUtils.renderLegend(this.legend, this.mainSvgElement, options.viewport, this.legendProperties);
         } else {
             this.legendElement && this.legendElement.selectAll("*").remove();
@@ -300,7 +300,7 @@ export class Visual implements IVisual {
         this.renderAxes();
         RenderAxes.rotateXAxisTickLabels(this.isNeedToRotate, this.xAxisSvgGroup);
         this.finalRendering();
-        
+
         this.scrollBar.update();
 
         const bars = this.barGroup.selectAll(Selectors.BarSelect.selectorName).data(visibleDataPoints);
@@ -317,7 +317,7 @@ export class Visual implements IVisual {
         this.prepareMainSvgElementForNormalChart();
 
         this.chartsContainer = this.mainSvgElement.append("g").attr('id', 'chartsContainer');
-        
+
         // Append SVG groups for X and Y axes.
         this.xAxisSvgGroup = this.chartsContainer.append("g").attr('id', 'xAxisSvgGroup');
         this.yAxisSvgGroup = this.chartsContainer.append("g").attr('id', 'yAxisSvgGroup');
@@ -337,7 +337,7 @@ export class Visual implements IVisual {
             .classed(Selectors.LabelGraphicsContext.className, true);
 
         this.mainElement.select('.scrollbar-track').remove();
-        
+
         this.scrollBar.init(this.mainElement);
     }
 
@@ -346,7 +346,7 @@ export class Visual implements IVisual {
             this.mainDivElement.remove();
             this.mainDivElement = null;
         }
-        
+
         // This SVG will contain our visual
         if ( this.mainSvgElement ){
             this.mainSvgElement.selectAll("*").remove();
@@ -362,7 +362,6 @@ export class Visual implements IVisual {
         if (!this.optionsAreValid(options)) {
             return;
         }
-        debugger;
 
         const dataView = options && options.dataViews && options.dataViews[0];
 
@@ -431,7 +430,7 @@ export class Visual implements IVisual {
         return 35;
     }
 
-    public calculateXAxisSize(settings: VisualSettings): number {      
+    public calculateXAxisSize(settings: VisualSettings): number {
 
         const fontSize: string = PixelConverter.toString(settings.categoryAxis.fontSize);
         const fontFamily: string = settings.categoryAxis.fontFamily;
@@ -446,7 +445,7 @@ export class Visual implements IVisual {
         return height + 8;
     }
 
-    public calculateXAxisSizeForCategorical(values: PrimitiveValue[], settings: VisualSettings, metadata: VisualMeasureMetadata, barHeight: number): number {      
+    public calculateXAxisSizeForCategorical(values: PrimitiveValue[], settings: VisualSettings, metadata: VisualMeasureMetadata, barHeight: number): number {
         let formatter: IValueFormatter;
 
         if ((values.some(x => x && typeof (<any>x).getMonth === 'function'))) {
@@ -505,9 +504,9 @@ export class Visual implements IVisual {
 
     private calculateChartSize(viewport: IViewport,
         settings: smallMultipleSettings,
-        leftSpace: number, 
-        topSpace: number, 
-        rows: number, 
+        leftSpace: number,
+        topSpace: number,
+        rows: number,
         columns: number,
         legendSize: LegendSize): SmallMultipleSizeOptions {
 
@@ -589,9 +588,9 @@ export class Visual implements IVisual {
         const uniqueColumns: PrimitiveValue[] = this.allDataPoints.map(x => x.columnBy).filter((v, i, a) => a.indexOf(v) === i);
         const uniqueRows: PrimitiveValue[] = this.allDataPoints.map(x => x.rowBy).filter((v, i, a) => a.indexOf(v) === i);
         const uniqueCategories: PrimitiveValue[] = this.allDataPoints.map(x => x.category).filter((v, i, a) => a.indexOf(v) === i);
-        
+
         const leftSpace: number = uniqueRows && uniqueRows.length === 1 && uniqueRows[0] === null ? 0 : this.calculateLabelsSize(this.settings.smallMultiple);
-        const topSpace: number = this.calculateTopSpace(this.settings.smallMultiple);            
+        const topSpace: number = this.calculateTopSpace(this.settings.smallMultiple);
 
         const hasHighlight = this.allDataPoints.filter(x => x.highlight).length > 0;
 
@@ -600,7 +599,7 @@ export class Visual implements IVisual {
         const gapBetweenCharts: number = 10;
 
         this.prepareMainDiv(this.mainElement);
-        this.mainElement.select('.scrollbar-track').remove();      
+        this.mainElement.select('.scrollbar-track').remove();
 
         let legendSize: LegendSize = {
             width: 0,
@@ -648,7 +647,7 @@ export class Visual implements IVisual {
             this.settings.categoryAxis.innerPadding,
             this.settings,
             !xIsScalar) : 0;
-        
+
         const xAxisSizeReverted: number = this.settings.categoryAxis.axisType === "categorical" || !xIsScalar ? this.calculateXAxisSizeForCategorical(uniqueCategories, this.settings, this.metadata, barHeight) : -1;
         let xAxisSize: number = xAxisSizeReverted > 0 ? xAxisSizeReverted : this.calculateXAxisSize(this.settings);
 
@@ -660,7 +659,7 @@ export class Visual implements IVisual {
             .style("overflow-x", chartSize.isHorizontalSliderNeeded ? "auto" : "hidden")
             .style("overflow-y", chartSize.isVerticalSliderNeeded ? "auto" : "hidden");
 
-        let maxLabelHeight: number = (chartSize.height) / 100 * this.settings.categoryAxis.maximumSize; 
+        let maxLabelHeight: number = (chartSize.height) / 100 * this.settings.categoryAxis.maximumSize;
         let forceRotaion: boolean = xAxisSizeReverted > 0;
 
         if (this.settings.categoryAxis.maximumSize) {
@@ -671,8 +670,8 @@ export class Visual implements IVisual {
                 forceRotaion = true;
             } else {
                 maxLabelHeight = Number.MAX_VALUE;
-            }    
-        } 
+            }
+        }
 
         let axes: IAxes;
 
@@ -710,7 +709,7 @@ export class Visual implements IVisual {
             legendData: this.legendProperties.data,
             categoriesCount: null,
             isSmallMultiple: this.isSmallMultiple()
-        }                       
+        }
 
         let svgHeight: number = 0,
             svgWidth: number = 0;
@@ -762,17 +761,17 @@ export class Visual implements IVisual {
                 xAxisSvgGroup.attr(
                     "transform",
                     svg.translate(
-                        marginLeft + 
+                        marginLeft +
                         (yHasRightPosition ? 0 : yAxisSize),
                         barsSectionSize.height));
-    
+
                 yAxisSvgGroup.attr(
                     "transform",
                     svg.translate(
                         marginLeft +
                         (yHasRightPosition ? barsSectionSize.width : yAxisSize),
-                        0));        
-                        
+                        0));
+
                 if (yIsSeparate || xIsSeparate) {
                     if (!dataPoints || !dataPoints.length) {
                         axes = defaultAxes;
@@ -791,9 +790,9 @@ export class Visual implements IVisual {
                     } else {
                         const uniqueCategoriesCount: number = dataPoints.map(x => x.category).filter((v, i, a) => a.indexOf(v) === i).length;
                         axes = !yIsSeparate && !xIsSeparate ? defaultAxes : this.createSmallMultipleAxesByDomains(xDomain, yDomain, barsSectionSize, maxLabelHeight, uniqueCategoriesCount);
-                    }                       
+                    }
                 }
-    
+
                 if (!this.data.axes) {
                     this.data.axes = defaultAxes;
                 }
@@ -826,7 +825,7 @@ export class Visual implements IVisual {
                         }
                     }
 
-                    for (let i = 0; i < xText.length; ++i) { 
+                    for (let i = 0; i < xText.length; ++i) {
                         if (i % divider > 0) {
                             d3.select(xText[i]).remove();
                         }
@@ -850,7 +849,7 @@ export class Visual implements IVisual {
                         }
                     }
 
-                    for (let i = 0; i < yText.length; ++i) { 
+                    for (let i = 0; i < yText.length; ++i) {
                         if (i % divider > 0) {
                             d3.select(yText[i]).remove();
                         }
@@ -889,7 +888,7 @@ export class Visual implements IVisual {
 
                 barSelect.exit()
                     .remove();
-                
+
                 barSelect
                     .attr("height", d => {
                         return d.barCoordinates.height;
@@ -904,7 +903,7 @@ export class Visual implements IVisual {
                         return d.barCoordinates.y;
                     })
                     .attr("fill", d => d.color );
-                
+
                 barSelect
                     .style("fill-opacity", (p: VisualDataPoint) => visualUtils.getFillOpacity(
                         p.selected,
@@ -918,8 +917,8 @@ export class Visual implements IVisual {
                             !p.highlight && hasSelection,
                             !p.selected && hasHighlight)) {
                                 return Visual.DefaultStrokeSelectionColor;
-                            }                        
-    
+                            }
+
                         return p.color;
                     })
                     .style("stroke-width", p => {
@@ -929,7 +928,7 @@ export class Visual implements IVisual {
                             !p.selected && hasHighlight)) {
                             return Visual.DefaultStrokeSelectionWidth;
                         }
-    
+
                         return Visual.DefaultStrokeWidth;
                     });
 
@@ -986,7 +985,7 @@ export class Visual implements IVisual {
                     if (axes.y.dataDomain[0] <= this.settings.constantLine.value && this.settings.constantLine.value <= axes.y.dataDomain[1]) {
                         RenderVisual.renderConstantLine(this.settings.constantLine, barGroup, axes, xWidth);
                     }
-                }                    
+                }
             }
         }
 
@@ -1001,7 +1000,7 @@ export class Visual implements IVisual {
                 xAxisLabelSize: xAxisSize,
                 rowsInFlow: rowsInFlow
             }, this.settings.smallMultiple);
-        }            
+        }
 
         if (this.settings.smallMultiple.showChartTitle) {
             RenderVisual.renderSmallMultipleTitles({
@@ -1014,7 +1013,7 @@ export class Visual implements IVisual {
                 xAxisLabelSize: xAxisSize,
                 rowsInFlow: rowsInFlow
             }, this.settings.smallMultiple);
-        }            
+        }
 
         const legendBucketFilled: boolean = !!(this.dataView.categorical && this.dataView.categorical.values && this.dataView.categorical.values.source);
         this.lassoSelection.disable();
@@ -1354,7 +1353,7 @@ export class Visual implements IVisual {
         let isReverted: boolean = false;
 
         if (this.data && (!this.data.axes.xIsScalar || this.settings.categoryAxis.axisType !== "continuous")) {
-            isReverted = !!this.maxXLabelsWidth || xAxisMaxLableWidth > (this.data.axes.x.scale.rangeBand ? this.data.axes.x.scale.bandwidth() : 0 + innerPadding);
+            isReverted = !!this.maxXLabelsWidth || xAxisMaxLableWidth > (this.data.axes.x.scale.bandwidth ? this.data.axes.x.scale.bandwidth() : 0 + innerPadding);
         }
 
         const titleSize: number = (showXAxisTitle
@@ -1443,7 +1442,7 @@ export class Visual implements IVisual {
         const yHasLeftPosition: boolean = this.settings.valueAxis.show && this.settings.valueAxis.position === "left";
 
         const translateX: number = yHasLeftPosition ? this.axesSize.yAxisWidth + this.yTickOffset : 0;
-            
+
         this.xAxisSvgGroup.attr(
             "transform",
             svg.translate(
