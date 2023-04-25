@@ -28,13 +28,13 @@ export class DataLabelHelper {
                                             barCoordinates: Coordinates,
                                             settings: categoryLabelsSettings) {
 
-        let barY: number = barCoordinates.y,
+        const barY: number = barCoordinates.y,
             barHeight: number = barCoordinates.height,
             backGroundShift: number = settings.showBackground ? DataLabelHelper.labelBackgroundYShift : 0,
             labelTopBorderPosition: number = shift - labelHeight + backGroundShift,
             labelBottomBorderPosition: number = shift - backGroundShift;
 
-        let maxPossibleTopPosition: number = barY,
+        const maxPossibleTopPosition: number = barY,
             maxPossibleBottomPosition: number = barY + barHeight;
 
         const gap: number = 2;
@@ -64,15 +64,15 @@ export class DataLabelHelper {
                                             barCoordinates: Coordinates,
                                             settings: categoryLabelsSettings) {
 
-        let barY: number = barCoordinates.y,
+        const barY: number = barCoordinates.y,
             barHeight: number = barCoordinates.height,
             backGroundShift: number = settings.showBackground ? DataLabelHelper.labelBackgroundYShift : 0,
             labelTopBorderPosition: number = shift - labelHeight + backGroundShift,
             labelBottomBorderPosition: number = shift - backGroundShift;
 
-        let canOverflow: boolean = DataLabelHelper.canOverflow(settings);
+        const canOverflow: boolean = DataLabelHelper.canOverflow(settings);
 
-        let maxPossibleTopPosition: number = canOverflow ? 0 : barY,
+        const maxPossibleTopPosition: number = canOverflow ? 0 : barY,
             maxPossibleBottomPosition: number = barY + barHeight;
 
         if (labelBottomBorderPosition > maxPossibleBottomPosition) {
@@ -98,8 +98,8 @@ export class DataLabelHelper {
                                         chartHeight: number,
                                         isLegendRendered: boolean): number {
 
-        let barCoordinates: Coordinates = dataPoint.barCoordinates;
-        let shift: number = dataPoint.value >= 0 ? 
+        const barCoordinates: Coordinates = dataPoint.barCoordinates;
+        const shift: number = dataPoint.value >= 0 ? 
                                 this.calculateLabelPositionShift(settings, labelHeight, barCoordinates, isLegendRendered) : 
                                 this.calculateLabelPositionShiftForNegativeValues(settings, labelHeight, barCoordinates, isLegendRendered);
 
@@ -117,7 +117,7 @@ export class DataLabelHelper {
 
         const backgroundMargin: number = settings.showBackground ? 2 : 0;
 
-        let barY: number = barCoordinates.y,
+        const barY: number = barCoordinates.y,
             barHeight: number = barCoordinates.height;
 
         switch (settings.labelPosition) {
@@ -146,7 +146,7 @@ export class DataLabelHelper {
 
         const backgroundMargin: number = settings.showBackground ? 2 : 0;
 
-        let barY: number = barCoordinates.y,
+        const barY: number = barCoordinates.y,
             barHeight: number = barCoordinates.height;
 
         switch (settings.labelPosition) {
