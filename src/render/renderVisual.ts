@@ -100,7 +100,7 @@ export class RenderVisual {
         // Now we bind each SVG group to the values in corresponding category.
         // To keep the length of the values array, we transform each value into object,
         // that contains both value and total count of all values in this category.
-        const barSelect = barGroupSelect
+        let barSelect = barGroupSelect
             .selectAll(Selectors.BarSelect.selectorName)
             .data(data.dataPoints);
 
@@ -112,11 +112,12 @@ export class RenderVisual {
         const barSelectEnter = barSelect.enter().append('rect')
             .attr('class', Selectors.BarSelect.className);
 
+        barSelect = barSelect.merge(barSelectEnter);
+
         const interactivityService = visualInteractivityService,
             hasSelection: boolean = interactivityService.hasSelection();
 
         barSelect
-            .merge(barSelectEnter)
             .attr('height', d => {
                 return d.barCoordinates.height;
             })
@@ -447,11 +448,9 @@ export class RenderVisual {
     }
 
     public static renderTooltip(selection: d3Update<any>, tooltipServiceWrapper: ITooltipServiceWrapper): void {
-        tooltipServiceWrapper.addTooltip(
+        tooltipServiceWrapper.addTooltip<VisualDataPoint>(
             selection,
-            (tooltipEvent: VisualDataPoint) => {
-                return (<VisualDataPoint>tooltipEvent).tooltips;
-            },
+            (tooltipEvent) => tooltipEvent.tooltips,
             null,
             true);
     }
