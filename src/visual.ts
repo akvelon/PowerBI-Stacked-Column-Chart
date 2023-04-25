@@ -822,7 +822,7 @@ export class Visual implements IVisual {
                     this.data.axes = defaultAxes;
                 }
 
-                const barHeight: number = !xIsScalar || this.settings.categoryAxis.axisType === 'categorical' ? axes.x.scale.rangeBand() : visualUtils.calculateDataPointThickness(
+                const barHeight: number = !xIsScalar || this.settings.categoryAxis.axisType === 'categorical' ? axes.x.scale.bandwidth() : visualUtils.calculateDataPointThickness(
                     dataPoints,
                     barsSectionSize,
                     uniqueCategories.length,
@@ -904,15 +904,17 @@ export class Visual implements IVisual {
                     hasSelection: boolean = interactivityService.hasSelection();
                 interactivityService.applySelectionStateToData(dataPoints);
 
-                const barSelect = barGroup
+                let barSelect = barGroup
                     .selectAll(Selectors.BarSelect.selectorName)
                     .data(dataPoints);
 
-                barSelect.enter().append('rect')
+                const barSelectEnter = barSelect.enter().append('rect')
                     .attr('class', Selectors.BarSelect.className);
 
                 barSelect.exit()
                     .remove();
+
+                barSelect = barSelect.merge(barSelectEnter);
 
                 barSelect
                     .attr('height', d => {
@@ -968,6 +970,17 @@ export class Visual implements IVisual {
                     dataPoints,
                 );
 
+                const labelBackgroundContext = barGroup
+                    .append('g')
+                    .classed(Selectors.LabelBackgroundContext.className, true);
+
+                RenderVisual.renderDataLabelsBackgroundForSmallMultiple(
+                    this.data,
+                    this.settings,
+                    labelBackgroundContext,
+                    dataPoints,
+                );
+
                 const labelGraphicsContext = barGroup
                     .append('g')
                     .classed(Selectors.LabelGraphicsContext.className, true);
@@ -977,17 +990,6 @@ export class Visual implements IVisual {
                     this.settings,
                     labelGraphicsContext,
                     this.metadata,
-                    dataPoints,
-                );
-
-                const labelBackgroundContext = barGroup
-                    .append('g')
-                    .classed(Selectors.LabelBackgroundContext.className, true);
-
-                RenderVisual.renderDataLabelsBackgroundForSmallMultiple(
-                    this.data,
-                    this.settings,
-                    labelBackgroundContext,
                     dataPoints,
                 );
 

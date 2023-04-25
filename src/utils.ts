@@ -404,8 +404,8 @@ export function smallMultipleLabelRotationIsNeeded(
 
     let maxLabelWidth: number = 0;
 
-    xAxisSvgGroup.selectAll('text').nodes().forEach(function () {
-        const labelWidth: number = this.getBoundingClientRect().width;
+    xAxisSvgGroup.selectAll<SVGTextElement, undefined>('text').nodes().forEach(function (textNode) {
+        const labelWidth: number = textNode.getBoundingClientRect().width;
 
         maxLabelWidth = Math.max(maxLabelWidth, labelWidth > maxLabelHeight ? maxLabelHeight : labelWidth);
     });

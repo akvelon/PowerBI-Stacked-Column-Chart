@@ -240,14 +240,16 @@ export class RenderVisual {
             return;
         }
 
-        const dataPointsArray: VisualDataPoint[] = this.filterData(dataPoints || data.dataPoints),
-            backgroundSelection: d3Update<VisualDataPoint> = dataLabelsBackgroundContext
-                .selectAll(RenderVisual.Label.selectorName)
-                .data(dataPointsArray);
+        const dataPointsArray: VisualDataPoint[] = this.filterData(dataPoints || data.dataPoints);
+        let backgroundSelection: d3Update<VisualDataPoint> = dataLabelsBackgroundContext
+            .selectAll(RenderVisual.Label.selectorName)
+            .data(dataPointsArray);
 
-        backgroundSelection
+        const backgroundSelectionEnter = backgroundSelection
             .enter()
             .append('svg:rect');
+
+        backgroundSelection = backgroundSelection.merge(backgroundSelectionEnter);
 
         backgroundSelection
             .attr('height', d => {
@@ -332,10 +334,10 @@ export class RenderVisual {
             return;
         }
 
-        const dataPointsArray: VisualDataPoint[] = this.filterData(dataPoints || data.dataPoints),
-            labelSelection: d3Update<VisualDataPoint> = dataLabelsContext
-                .selectAll(RenderVisual.Label.selectorName)
-                .data(dataPointsArray);
+        const dataPointsArray: VisualDataPoint[] = this.filterData(dataPoints || data.dataPoints);
+        let labelSelection: d3Update<VisualDataPoint> = dataLabelsContext
+            .selectAll(RenderVisual.Label.selectorName)
+            .data(dataPointsArray);
 
         const dataLabelFormatter: IValueFormatter =
             formattingUtils.createFormatter(labelSettings.displayUnits,
@@ -343,9 +345,11 @@ export class RenderVisual {
                 metadata.cols.value,
                 getValueForFormatter(data));
 
-        labelSelection
+        const labelSelectionEnter = labelSelection
             .enter()
             .append('svg:text');
+
+        labelSelection = labelSelection.merge(labelSelectionEnter);
 
         const fontSizeInPx: string = PixelConverter.fromPoint(labelSettings.fontSize);
         const fontFamily: string = labelSettings.fontFamily ? labelSettings.fontFamily : dataLabelUtils.LabelTextProperties.fontFamily;

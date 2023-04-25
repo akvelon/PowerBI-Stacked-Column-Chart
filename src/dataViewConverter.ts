@@ -81,7 +81,7 @@ export class DataViewConverter {
     }
 
     public static IsCategoryFilled(dataView: DataView, categoryField: Field): boolean {
-        if (dataView.categorical
+        if (dataView?.categorical
             && dataView.categorical.values
             && dataView.categorical.values.source
             && dataView.categorical.values.source.roles[categoryField]) {
