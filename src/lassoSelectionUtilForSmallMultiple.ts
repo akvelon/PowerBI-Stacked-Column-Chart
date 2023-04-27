@@ -1,13 +1,13 @@
-"use strict";
+'use strict';
 
-import { ClassAndSelector } from "powerbi-visuals-utils-svgutils/lib/cssConstants";
+import {ClassAndSelector} from 'powerbi-visuals-utils-svgutils/lib/cssConstants';
 
-import { d3Selection, DefaultOpacity, DimmedOpacity } from "./utils";
-import { IColVisual, VisualDataPoint } from "./visualInterfaces";
+import {d3Selection, DefaultOpacity, DimmedOpacity} from './utils';
+import {IColVisual, VisualDataPoint} from './visualInterfaces';
 
 import * as d3 from 'd3-selection';
 
-import powerbiApi from "powerbi-visuals-api";
+import powerbiApi from 'powerbi-visuals-api';
 import PrimitiveValue = powerbiApi.PrimitiveValue;
 
 interface CursorPosition {
@@ -41,7 +41,7 @@ export class LassoSelectionForSmallMultiple {
 
     private barClassName: string;
 
-    constructor(barSelect: ClassAndSelector, visual: IColVisual){
+    constructor(barSelect: ClassAndSelector, visual: IColVisual) {
         this.barClassName = barSelect.className;
         this.visual = visual;
     }
@@ -57,24 +57,26 @@ export class LassoSelectionForSmallMultiple {
         this.domItems.update(bars);
         this.legendBucketFilled = legendBucketFilled;
 
-        this.svgChart.on( `mousedown${Constants.EventNameSpace}`, (e) => { this.lasso.init( e as MouseEvent ); });
+        this.svgChart.on(`mousedown${Constants.EventNameSpace}`, (e) => {
+            this.lasso.init(e as MouseEvent);
+        });
         d3.select('html')
-            .on(`mousemove${Constants.EventNameSpace}`, this.onMousemove.bind(this) )
-            .on(`mouseup${Constants.EventNameSpace}`, this.onMouseup.bind(this) );
+            .on(`mousemove${Constants.EventNameSpace}`, this.onMousemove.bind(this))
+            .on(`mouseup${Constants.EventNameSpace}`, this.onMouseup.bind(this));
     }
 
     disable(): void {
-        if ( this.svgChart ){
-            this.svgChart.on( `mousedown${Constants.EventNameSpace}`, null);
+        if (this.svgChart) {
+            this.svgChart.on(`mousedown${Constants.EventNameSpace}`, null);
         }
         d3.select('html')
-            .on(`mousemove${Constants.EventNameSpace}`, null )
-            .on(`mouseup${Constants.EventNameSpace}`, null );
+            .on(`mousemove${Constants.EventNameSpace}`, null)
+            .on(`mouseup${Constants.EventNameSpace}`, null);
     }
 
     private onMousemove(e: MouseEvent): void {
-        if ( !this.lasso.started ){
-            if ( this.lasso.detectIfStarted(e) ){
+        if (!this.lasso.started) {
+            if (this.lasso.detectIfStarted(e)) {
                 this.start();
             } else {
                 return;
@@ -83,7 +85,7 @@ export class LassoSelectionForSmallMultiple {
 
         this.lasso.calculateRectDimensions({
             x: e.clientX,
-            y: e.clientY
+            y: e.clientY,
         });
 
         this.lassoElement.setPos(this.lasso.x, this.lasso.y);
@@ -91,11 +93,11 @@ export class LassoSelectionForSmallMultiple {
 
         this.preselection.updatePreselectionData(this.lasso, this.domItems.get(), e.ctrlKey);
 
-        if ( !this.legendBucketFilled ){
+        if (!this.legendBucketFilled) {
             this.preselection.preSelectEntireCategories(this.svgChart);
         }
 
-        this.domItems.setPreviewStyles(); 
+        this.domItems.setPreviewStyles();
     }
 
     private onMouseup(): void {
@@ -103,9 +105,9 @@ export class LassoSelectionForSmallMultiple {
             return;
         }
 
-        if ( !this.lasso.started ){
+        if (!this.lasso.started) {
             this.onClick();
-            if ( !this.legendBucketFilled ){
+            if (!this.legendBucketFilled) {
                 this.preselection.preSelectEntireCategories(this.svgChart);
             }
         }
@@ -121,8 +123,8 @@ export class LassoSelectionForSmallMultiple {
         const target: d3Selection<any> = d3.select(this.lasso.mousedown.target as HTMLElement);
 
         // a click on an empty space
-        if ( !target.classed(this.barClassName) ){
-            if ( !this.lasso.mousedown.ctrlKey ){
+        if (!target.classed(this.barClassName)) {
+            if (!this.lasso.mousedown.ctrlKey) {
                 this.domItems.clearSelectionData();
             }
             return;
@@ -131,14 +133,14 @@ export class LassoSelectionForSmallMultiple {
         const datum: VisualDataPoint = target.datum() as VisualDataPoint;
 
         // multiselection by Ctrl
-        if ( this.lasso.mousedown.ctrlKey ){
+        if (this.lasso.mousedown.ctrlKey) {
             datum.preRemoved = DomItems.dataPointIsPartOfSelection(datum);
             datum.preSelected = !datum.preRemoved;
             return;
         }
 
         // single selection of the non-selected point
-        if ( !DomItems.dataPointIsPartOfSelection(datum) ){
+        if (!DomItems.dataPointIsPartOfSelection(datum)) {
             this.domItems.clearSelectionData();
             datum.preSelected = true;
             return;
@@ -147,7 +149,7 @@ export class LassoSelectionForSmallMultiple {
         // single selection of the selected point
         const countPreselected: number = this.domItems.countPreselectedOrSelected();
         this.domItems.clearSelectionData();
-        if ( countPreselected !== 1 ){
+        if (countPreselected !== 1) {
             // deselecting the only-selected point
             datum.preSelected = true;
         }
@@ -156,7 +158,7 @@ export class LassoSelectionForSmallMultiple {
     private start(): void {
         this.lasso.started = true;
 
-        if ( !this.lasso.mousedown.ctrlKey ){
+        if (!this.lasso.mousedown.ctrlKey) {
             this.domItems.clearSelectionData();
         }
 
@@ -176,7 +178,7 @@ export class LassoSelectionForSmallMultiple {
         const selectedDataPoints: VisualDataPoint[] = [];
 
         bars.each((d: VisualDataPoint) => {
-            if ( d.preSelected ){
+            if (d.preSelected) {
                 d.selected = true;
                 handledDataPoints.push(d);
             } else if (d.preRemoved) {
@@ -184,16 +186,16 @@ export class LassoSelectionForSmallMultiple {
                 handledDataPoints.push(d);
             }
 
-            if ( d.selected ){
+            if (d.selected) {
                 selectedDataPoints.push(d);
             }
 
             d.preSelected = d.preRemoved = false;
         });
 
-        if ( handledDataPoints.length > 0 ){
-            this.visual.webBehaviorSelectionHandler.handleSelection(handledDataPoints, this.lasso.mousedown.ctrlKey); 
-        } else if ( !this.lasso.mousedown.ctrlKey && !this.domItems.hasHighlight()) {
+        if (handledDataPoints.length > 0) {
+            this.visual.webBehaviorSelectionHandler.handleSelection(handledDataPoints, this.lasso.mousedown.ctrlKey);
+        } else if (!this.lasso.mousedown.ctrlKey && !this.domItems.hasHighlight()) {
             this.visual.webBehaviorSelectionHandler.handleClearSelection();
         }
 
@@ -204,23 +206,26 @@ export class LassoSelectionForSmallMultiple {
 class Preselection {
     private action: SelectionAction | null = null;
 
-    reset(): void{
+    reset(): void {
         this.action = null;
     }
 
     updatePreselectionData(selectionService: Lasso, bars: d3Selection<any>, ctrlKey: boolean): void {
-        if ( !ctrlKey ) {
-            this.action = SelectionAction.Add;
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const self: Preselection = this;
+
+        if (!ctrlKey) {
+            self.action = SelectionAction.Add;
         }
 
-        bars.each(function(d: VisualDataPoint){
+        bars.each(function (d: VisualDataPoint) {
             const collision: boolean = selectionService.detectCollision(this);
 
-            if (this.action === null && collision ){
-                this.action = d.selected ? SelectionAction.Remove : SelectionAction.Add;
+            if (self.action === null && collision) {
+                self.action = d.selected ? SelectionAction.Remove : SelectionAction.Add;
             }
 
-            switch (this.action){
+            switch (self.action) {
                 case SelectionAction.Add : {
                     d.preSelected = collision && !d.selected;
                     break;
@@ -234,24 +239,24 @@ class Preselection {
     }
 
     preSelectEntireCategories(svgChart: d3Selection<any>): void {
-        svgChart.selectAll('.bar-group').each(function(){
+        svgChart.selectAll('.bar-group').each(function () {
             const bars: d3Selection<any> = d3.select(this).selectAll('.bar');
-            
+
             const preSelectedCategories: PrimitiveValue[] = [];
             const preRemovedCategories: PrimitiveValue[] = [];
 
-            bars.each(function(d: VisualDataPoint){
-                if ( d.preSelected){
+            bars.each(function (d: VisualDataPoint) {
+                if (d.preSelected) {
                     preSelectedCategories.push(d.category);
-                } else if ( d.preRemoved ){
+                } else if (d.preRemoved) {
                     preRemovedCategories.push(d.category);
                 }
             });
 
-            bars.each(function(d: VisualDataPoint){
-                if ( preSelectedCategories.indexOf(d.category) > -1 ){
+            bars.each(function (d: VisualDataPoint) {
+                if (preSelectedCategories.indexOf(d.category) > -1) {
                     d.preSelected = true;
-                } else if ( preRemovedCategories.indexOf(d.category) > -1 ){
+                } else if (preRemovedCategories.indexOf(d.category) > -1) {
                     d.preRemoved = true;
                 }
             });
@@ -271,32 +276,32 @@ class DomItems {
     }
 
     setPreviewStyles(): void {
-        if ( this.countPreselectedOrSelected() > 0 ){
+        if (this.countPreselectedOrSelected() > 0) {
             this.setOpacity(
-                0,
-                (d: VisualDataPoint) => DomItems.dataPointIsPartOfSelection(d) ? DefaultOpacity : DimmedOpacity
+                null,
+                (d: VisualDataPoint) => DomItems.dataPointIsPartOfSelection(d) ? DefaultOpacity : DimmedOpacity,
             );
-        } else if ( !this.hasHighlight() ) {
+        } else if (!this.hasHighlight()) {
             this.setOpacity(DefaultOpacity);
         }
     }
 
     countPreselectedOrSelected(): number {
         const preselected: d3Selection<any> = this.bars.filter((d: VisualDataPoint) =>
-            DomItems.dataPointIsPartOfSelection(d)
+            DomItems.dataPointIsPartOfSelection(d),
         );
 
         return preselected.size();
     }
 
     setStyles(): void {
-        if ( this.countPreselectedOrSelected() > 0 ){
+        if (this.countPreselectedOrSelected() > 0) {
             this.setOpacity(
-                0,
-                (d: VisualDataPoint) => d.selected ? DefaultOpacity : DimmedOpacity
+                null,
+                (d: VisualDataPoint) => d.selected ? DefaultOpacity : DimmedOpacity,
             );
             this.setStroke(true);
-        } else if ( !this.hasHighlight() ) {
+        } else if (!this.hasHighlight()) {
             this.setOpacity(DefaultOpacity);
             this.setStroke(false);
         }
@@ -317,13 +322,13 @@ class DomItems {
     }
 
     private setStroke(hasSelection: boolean) {
-        this.bars.each(function(d: VisualDataPoint){ 
-            this.style.stroke = hasSelection ? "#000000" : (d.color || '');
+        this.bars.each(function (d: VisualDataPoint) {
+            this.style.stroke = hasSelection ? '#000000' : (d.color || '');
         });
     }
 
-    private setOpacity(opacity: number, calculateOpacity?: ((d: VisualDataPoint) => number) ): void {
-        this.bars.each(function(d: VisualDataPoint){
+    private setOpacity(opacity: number, calculateOpacity?: ((d: VisualDataPoint) => number)): void {
+        this.bars.each(function (d: VisualDataPoint) {
             const opacityValue: number | undefined = opacity ? opacity : calculateOpacity && calculateOpacity(d);
 
             if (opacityValue) {
@@ -349,7 +354,7 @@ class Lasso {
 
     mousedown: MouseEvent;
 
-    init(mousedown: MouseEvent){
+    init(mousedown: MouseEvent) {
         this.active = true;
 
         this.mousedown = mousedown;
@@ -364,7 +369,7 @@ class Lasso {
     }
 
     detectIfStarted(mousemove: MouseEvent): boolean {
-        if ( !this.active ){
+        if (!this.active) {
             return false;
         }
 
@@ -418,8 +423,8 @@ class Lasso {
 class LassoElement {
     private d3_element: d3Selection<any>;
     private element: HTMLElement;
-    
-    constructor(d3_element: d3Selection<any>){
+
+    constructor(d3_element: d3Selection<any>) {
         this.d3_element = d3_element;
         this.element = d3_element.node() as HTMLElement;
     }
@@ -439,19 +444,19 @@ class LassoElement {
 
     setPos(x: number, y: number): void {
         this.d3_element.style(
-            "left", x.toString() + 'px'
+            'left', x.toString() + 'px',
         );
         this.d3_element.style(
-            "top", y.toString() + 'px'
+            'top', y.toString() + 'px',
         );
     }
 
     setSize(width: number, height: number): void {
         this.d3_element.style(
-            "width", width.toString() + 'px',
+            'width', width.toString() + 'px',
         );
         this.d3_element.style(
-            "height", height.toString() + 'px'
+            'height', height.toString() + 'px',
         );
     }
 
