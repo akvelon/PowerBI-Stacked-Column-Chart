@@ -5,3 +5,4 @@ node_modules
 dist
 .api
 .idea
+webpack.statistics.html

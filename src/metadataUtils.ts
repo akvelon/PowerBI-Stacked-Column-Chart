@@ -1,58 +1,65 @@
-module powerbi.extensibility.visual.metadataUtils {
-    import getMeasureIndexOfRole = powerbi.extensibility.utils.dataview.DataRoleHelper.getMeasureIndexOfRole;
-    import getCategoryIndexOfRole = powerbi.extensibility.utils.dataview.DataRoleHelper.getCategoryIndexOfRole;
+"use strict";
 
-    const ColumnCategory: string = "Axis";
-    const ColumnValue: string = "Value";
-    const ColumnGradient: string = "Gradient";
-    const ColumnColumnBy: string = 'ColumnBy';
-    const ColumnRowBy: string = 'RowBy';
+import powerbiApi from "powerbi-visuals-api";
+import { VisualMeasureMetadata } from "./visualInterfaces";
 
-    export function getMetadata(
-        categories: DataViewCategoryColumn[],
-        grouped: DataViewValueColumnGroup[],
-        source: DataViewMetadataColumn): VisualMeasureMetadata {
+import DataViewMetadataColumn = powerbiApi.DataViewMetadataColumn;
+import DataViewCategoryColumn = powerbiApi.DataViewCategoryColumn;
+import DataViewValueColumnGroup = powerbiApi.DataViewValueColumnGroup;
 
-        let xAxisLabel: string = "",
-            yAxisLabel: string = "",
-            valueIndex: number = getMeasureIndexOfRole(grouped, ColumnValue),
-            categoryIndex: number = getCategoryIndexOfRole(categories, ColumnCategory),
-            gradientIndex: number = getMeasureIndexOfRole(grouped, ColumnGradient),
-            valueCol: DataViewMetadataColumn,
-            categoryCol: DataViewMetadataColumn;
+import { dataRoleHelper } from "powerbi-visuals-utils-dataviewutils";
+import getMeasureIndexOfRole = dataRoleHelper.getMeasureIndexOfRole;
+import getCategoryIndexOfRole = dataRoleHelper.getCategoryIndexOfRole;
 
+const ColumnCategory: string = "Axis";
+const ColumnValue: string = "Value";
+const ColumnGradient: string = "Gradient"; 
+const ColumnColumnBy: string = 'ColumnBy';
+const ColumnRowBy: string = 'RowBy';
 
-        if (grouped && grouped.length) {
-            const firstGroup: DataViewValueColumnGroup = grouped[0];
+export function getMetadata(
+    categories: DataViewCategoryColumn[],
+    grouped: DataViewValueColumnGroup[],
+    source: DataViewMetadataColumn): VisualMeasureMetadata {
 
-            if (valueIndex >= 0) {
-                valueCol = firstGroup.values[valueIndex].source;
-                xAxisLabel = firstGroup.values[valueIndex].source.displayName;
-            }
+    let xAxisLabel: string = "";
+    let yAxisLabel: string = "";
+    const valueIndex: number = getMeasureIndexOfRole(grouped, ColumnValue);
+    const categoryIndex: number = getCategoryIndexOfRole(categories, ColumnCategory);
+    const gradientIndex: number = getMeasureIndexOfRole(grouped, ColumnGradient);
+    let valueCol: DataViewMetadataColumn;
+    let categoryCol: DataViewMetadataColumn;
 
-            if (categoryIndex >= 0) {
-                categoryCol = categories[categoryIndex].source;
-                yAxisLabel = categories[categoryIndex].source.displayName;
-            }
+    if (grouped && grouped.length) {
+        const firstGroup: DataViewValueColumnGroup = grouped[0];
+
+        if (valueIndex >= 0) {
+            valueCol = firstGroup.values[valueIndex].source;
+            xAxisLabel = firstGroup.values[valueIndex].source.displayName;
         }
 
-        return {
-            idx: {
-                category: categoryIndex,
-                value: valueIndex,
-                gradient: gradientIndex,
-                columnBy: getCategoryIndexOfRole(categories, ColumnColumnBy),
-                rowBy: getCategoryIndexOfRole(categories, ColumnRowBy)
-            },
-            cols: {
-                value: valueCol,
-                category: categoryCol
-            },
-            labels: {
-                x: xAxisLabel,
-                y: yAxisLabel
-            },
-            groupingColumn: source
-        };
+        if (categoryIndex >= 0) {
+            categoryCol = categories[categoryIndex].source;
+            yAxisLabel = categories[categoryIndex].source.displayName;
+        }
     }
+
+    return {
+        idx: {
+            category: categoryIndex,
+            value: valueIndex,
+            gradient: gradientIndex,
+            columnBy: getCategoryIndexOfRole(categories, ColumnColumnBy),
+            rowBy: getCategoryIndexOfRole(categories, ColumnRowBy)
+        },
+        cols: {
+            value: valueCol,
+            category: categoryCol
+        },
+        labels: {
+            x: xAxisLabel,
+            y: yAxisLabel
+        },
+        groupingColumn: source
+    };
 }

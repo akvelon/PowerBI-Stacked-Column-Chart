@@ -1,53 +1,38 @@
-/*
- *  Power BI Visualizations
- *
- *  Copyright (c) Microsoft Corporation
- *  All rights reserved.
- *  MIT License
- *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy
- *  of this software and associated documentation files (the ""Software""), to deal
- *  in the Software without restriction, including without limitation the rights
- *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  copies of the Software, and to permit persons to whom the Software is
- *  furnished to do so, subject to the following conditions:
- *
- *  The above copyright notice and this permission notice shall be included in
- *  all copies or substantial portions of the Software.
- *
- *  THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- *  THE SOFTWARE.
- */
+"use strict";
 
-module powerbi.extensibility.visual {
-    // d3
-    import Selection = d3.Selection;
+//utils
+import { d3Selection } from "./utils";
 
-    // powerbi.visuals
-    import IInteractiveBehavior = powerbi.extensibility.utils.interactivity.IInteractiveBehavior;
-    import SelectableDataPoint = powerbi.extensibility.utils.interactivity.SelectableDataPoint;
-    import IInteractivityService = powerbi.extensibility.utils.interactivity.IInteractivityService;
-    import ISelectionHandler = powerbi.extensibility.utils.interactivity.ISelectionHandler;
+// powerbi.visuals
+import { interactivityBaseService } from "powerbi-visuals-utils-interactivityutils";
+import IInteractiveBehavior = interactivityBaseService.IInteractiveBehavior;
+import IInteractivityService = interactivityBaseService.IInteractivityService;
+import ISelectionHandler = interactivityBaseService.ISelectionHandler;
+import BaseDataPoint = interactivityBaseService.BaseDataPoint;
+import IBehaviorOptions = interactivityBaseService.IBehaviorOptions;
 
-    export interface WebBehaviorOptions {
-        bars: Selection<any>;
-        clearCatcher: Selection<any>;
-        interactivityService: IInteractivityService;
+//powerbi.api
+import powerbiApi from "powerbi-visuals-api";
+import IVisualHost = powerbiApi.extensibility.visual.IVisualHost;
+
+import { IColVisual, VisualDataPoint } from "./visualInterfaces";
+import * as visualUtils from "./utils";
+import { Visual } from "./visual";
+
+    export interface WebBehaviorOptions extends IBehaviorOptions<BaseDataPoint>{
+        bars: d3Selection<any>;
+        clearCatcher: d3Selection<any>;
+        interactivityService: IInteractivityService<VisualDataPoint>;
         selectionSaveSettings?: any;
         host: IVisualHost;
     }
 
     export class WebBehavior implements IInteractiveBehavior {
-        private visual: Visual;
+        private visual: IColVisual;
         private options: WebBehaviorOptions;
         public selectionHandler: ISelectionHandler;
 
-        constructor(visual: Visual) {
+        constructor(visual: IColVisual) {
             this.visual = visual;
         }
 
@@ -57,19 +42,17 @@ module powerbi.extensibility.visual {
         }
 
         public renderSelection(hasSelection: boolean) {
-            let hasHighlight = this.visual.getAllDataPoints().filter(x => x.highlight).length > 0;
+            const hasHighlight = this.visual.getAllDataPoints().filter(x => x.highlight).length > 0;
 
-            let allDatapoints: VisualDataPoint[] = this.visual.getAllDataPoints();
-            //this.options.interactivityService.applySelectionStateToData(allDatapoints);
-            let currentSelection = allDatapoints.filter(d => d.selected);
-            
-            this.options.bars.style({
-                "fill-opacity": (p: VisualDataPoint) => visualUtils.getFillOpacity(
+            this.options.bars.style(
+                "fill-opacity", (p: VisualDataPoint) => visualUtils.getFillOpacity(
                         p.selected,
                         p.highlight,
                         !p.highlight && hasSelection,
                         !p.selected && hasHighlight),
-                "stroke": (p: VisualDataPoint)  => {
+            )
+            .style(
+                "stroke", (p: VisualDataPoint)  => {
                     if (hasSelection && visualUtils.isSelected(p.selected,
                         p.highlight,
                         !p.highlight && hasSelection,
@@ -78,8 +61,10 @@ module powerbi.extensibility.visual {
                         }                        
 
                     return p.color;
-                },
-                "stroke-width": p => {
+                }
+            )
+            .style(
+                "stroke-width", p => {
                     if (hasSelection && visualUtils.isSelected(p.selected,
                         p.highlight,
                         !p.highlight && hasSelection,
@@ -89,7 +74,9 @@ module powerbi.extensibility.visual {
 
                     return Visual.DefaultStrokeWidth;
                 }
-            });
+            )
+            .style("stroke-opacity", () => {
+                    return hasSelection || hasHighlight ? 1 : 0
+            })
         }
     }
-}

@@ -1,4 +1,13 @@
-module powerbi.extensibility.visual.visualUtils {
+"use strict";
+
+import powerbiApi from "powerbi-visuals-api";
+import DataView = powerbiApi.DataView;
+
+import * as d3 from 'd3-selection';
+
+import { CategoryDataPoints, IColVisual, SelectionState, VisualDataPoint } from "./visualInterfaces";
+import { DataViewConverter } from "./dataViewConverter";
+import { d3Selection as d3Selection, DefaultOpacity, DimmedOpacity } from "./utils";
 
     /*
         undefined, null - no selection
@@ -11,7 +20,7 @@ module powerbi.extensibility.visual.visualUtils {
         action: string;
         active: boolean;
         mousemoved: boolean;
-        rect?: d3.Selection<HTMLElement>;
+        rect?: d3Selection<HTMLElement>;
         rect_node?: HTMLElement;
         startX?: number;
         startY?: number;
@@ -30,7 +39,7 @@ module powerbi.extensibility.visual.visualUtils {
     }
 
     export class LassoSelection {
-        private visual: Visual;
+        private visual: IColVisual;
         private visibleBars: HTMLElement[];
         private readonly selection: Selection = {
             action: 'add',
@@ -40,26 +49,26 @@ module powerbi.extensibility.visual.visualUtils {
         private indexOfFirstVisibleDataPoint: number;
         private selectionStates: SelectionState[] = []; // Reflects data points' selection state
 
-        constructor(visual: Visual) {
+        constructor(visual: IColVisual) {
             this.visual = visual;
         }
 
-        init(mainElement: d3.Selection<HTMLElement>): void {
+        init(mainElement: d3Selection<HTMLElement>): void {
             if ( !this.selection.rect ){
                 this.selection.rect = mainElement.append('div').classed('selection-rect', true).classed('selection-rect-normal-chart', true);
                 this.selection.rect_node = this.selection.rect.node() as HTMLElement;
             }
 
-            d3.select('.bar-chart-svg').on('mousedown.selection', () => { this.onMousedown(); });
+            d3.select('.bar-chart-svg').on('mousedown.selection', (e) => { this.onMousedown(e); });
             d3.select('html')
-                .on('mousemove.selection', () => { this.onMousemove(); })
-                .on('mouseup.selection', () => { this.onMouseup(); });
+                .on('mousemove.selection', (e) => { this.onMousemove(e); })
+                .on('mouseup.selection', (e) => { this.onMouseup(e); });
         }
 
-        update<Datum>(bars: d3.Selection<any>): void {
+        update(bars: d3Selection<any>): void {
             this.visibleBars = [];
-            let barsArray = this.visibleBars;
-            bars.each(function (datum: Datum, index: number, outerIndex: number) {
+            const barsArray = this.visibleBars;
+            bars.each(function () {
                 barsArray.push(this);
             });
         }
@@ -77,9 +86,7 @@ module powerbi.extensibility.visual.visualUtils {
         }
 
         // Events
-        private onMousedown(): void {
-            let e: MouseEvent = d3.event as MouseEvent;
-
+        private onMousedown(e: MouseEvent): void {
             this.selection.active = true;
             this.selection.clickEvent = e;
             [this.selection.startX, this.selection.startY] = [e.clientX, e.clientY];
@@ -92,13 +99,12 @@ module powerbi.extensibility.visual.visualUtils {
             this.indexOfFirstVisibleDataPoint = this.visual.scrollBar.getIndexOfFirstVisibleDataPoint();
         }
 
-        private onMousemove(): void {
+        private onMousemove(e: MouseEvent): void {
             if (!this.selection.active) {
                 return;
             }
 
-            let e: MouseEvent = d3.event as MouseEvent;
-            if (!this.selection.mousemoved && e.clientX === this.selection.clickEvent.clientX && e.clientY === this.selection.clickEvent.clientY) {
+            if (!this.selection.mousemoved && e.clientX === this.selection?.clickEvent?.clientX && e.clientY === this.selection.clickEvent.clientY) {
                 return;
             }
 
@@ -117,15 +123,14 @@ module powerbi.extensibility.visual.visualUtils {
             });
             this.setRectPos(this.selection.x, this.selection.y);
             this.setRectSize(this.selection.width, this.selection.height);
-            let scrollIndex: number = this.indexOfFirstVisibleDataPoint;
-            let bars: HTMLElement[] = this.visibleBars;
-            for (let i: number = 0; i < bars.length; i++) {
-                let collided: boolean = this.detectCollision( this.visibleBars[i] );
-                let state: SelectionState = this.selectionStates[scrollIndex + i];
+            const scrollIndex: number = this.indexOfFirstVisibleDataPoint;
+            for (let i: number = 0; i < this.visibleBars.length; i++) {
+                const collided: boolean = this.detectCollision( this.visibleBars[i] );
+                const state: SelectionState = this.selectionStates[scrollIndex + i];
                 if (collided) {
                     // Firstly catch the case when we enable the "remove" mode
-                    if ((this.selectionStates.indexOf('justSelected') === -1 || this.selectionStates.indexOf('justRemoved') > -1 )
-                        && state === 'selected') {
+                    if (( this.selectionStates.indexOf('justSelected') === -1 || this.selectionStates.indexOf('justRemoved') > -1)
+                            && state === 'selected') {
 
                         this.selection.action = 'remove';
                         this.selectionStates[scrollIndex + i] = 'justRemoved';
@@ -133,18 +138,20 @@ module powerbi.extensibility.visual.visualUtils {
                     }
 
                     if (this.selection.action === 'add'
-                            && state !== 'selected'
-                            && state !== 'justSelected') {
+                        && state !== 'selected'
+                        && state !== 'justSelected') {
 
                         this.selectionStates[scrollIndex + i] = 'justSelected';
                     } else if (this.selection.action === 'remove'
-                                && state == 'selected'
-                                && state != null) {
+                        && state == 'selected') {
 
                         this.selectionStates[scrollIndex + i] = 'justRemoved';
                     }
 
-                } else if (this.selection.action === 'add' && state === 'justSelected') {
+                } else if (this.selection.action === 'add'
+                            && state === 'justSelected'
+                            && state !== null) {
+
                     this.selectionStates[scrollIndex + i] = null;
                 }
             }
@@ -156,17 +163,17 @@ module powerbi.extensibility.visual.visualUtils {
             this.updateFillOpacity();
         }
 
-        private onMouseup(): void {
+        private onMouseup(e: MouseEvent): void {
             if (!this.selection.active) {
                 this.deactivateRect();
                 return;
             }
 
             if (!this.selection.mousemoved) { // Selection by click
-                let target: HTMLElement = this.selection.clickEvent.target as HTMLElement;
-                let scrollIndex: number = this.indexOfFirstVisibleDataPoint;
+                const target: HTMLElement = this.selection.clickEvent.target as HTMLElement;
+                const scrollIndex: number = this.indexOfFirstVisibleDataPoint;
                 if (d3.select(target).classed(this.visual.barClassName)) {
-                    let targetIndex = this.visibleBars.indexOf(target);
+                    const targetIndex = this.visibleBars.indexOf(target);
                     if (this.selection.clickEvent.ctrlKey) {
                         if ( this.selectionStates[scrollIndex + targetIndex] != null ) {
                             this.selectionStates[scrollIndex + targetIndex] = 'justRemoved';
@@ -183,11 +190,12 @@ module powerbi.extensibility.visual.visualUtils {
             }
 
             this.deactivateRect();
-            this.applySelectionToTheVisual();
+            this.applySelectionToTheVisual(e);
         }
+        // /Events
 
         private isEntireCategorySelection(): boolean {
-            let dataView: DataView = this.visual.getDataView();
+            const dataView: DataView = this.visual.getDataView();
             return (
                 DataViewConverter.IsMultipleValues(dataView)
                 && !DataViewConverter.IsLegendFilled(dataView)
@@ -199,16 +207,16 @@ module powerbi.extensibility.visual.visualUtils {
         }
 
         private selectEntireCategories(): void {
-            let dataPointsByCategories: CategoryDataPoints[] = this.visual.getDataPointsByCategories();
+            const dataPointsByCategories: CategoryDataPoints[] = this.visual.getDataPointsByCategories();
             let allDataPointsIndex: number = 0;
 
             for (let categoryIndex: number = 0; categoryIndex < dataPointsByCategories.length; categoryIndex++) {
-                let dataPoints: VisualDataPoint[] = dataPointsByCategories[categoryIndex].dataPoints;
-                let firstItemIndex: number = allDataPointsIndex;
-                let categorySelectionStates: SelectionState[] = [];
+                const dataPoints: VisualDataPoint[] = dataPointsByCategories[categoryIndex].dataPoints;
+                const firstItemIndex: number = allDataPointsIndex;
+                const categorySelectionStates: SelectionState[] = [];
 
                 for (let categoryDataPointsIndex: number = 0; categoryDataPointsIndex < dataPoints.length; categoryDataPointsIndex++) {
-                    let selectionState: SelectionState = this.selectionStates[allDataPointsIndex];
+                    const selectionState: SelectionState = this.selectionStates[allDataPointsIndex];
                     categorySelectionStates.push(selectionState);
                     allDataPointsIndex++;
                 }
@@ -217,7 +225,7 @@ module powerbi.extensibility.visual.visualUtils {
                     for (let i: number = 0; i < categorySelectionStates.length; i++) {
                         this.selectionStates[firstItemIndex + i] = 'justRemoved';
                     }
-                } else if (categorySelectionStates.indexOf('selected') !== -1 || categorySelectionStates.indexOf('justSelected') !== -1) {
+                } else if ( categorySelectionStates.indexOf('selected') !== -1 || categorySelectionStates.indexOf('justSelected') !== -1) {
                     for (let i: number = 0; i < categorySelectionStates.length; i++) {
                         if (this.selectionStates[firstItemIndex + i] !== 'selected') {
                             this.selectionStates[firstItemIndex + i] = 'justSelected';
@@ -227,28 +235,24 @@ module powerbi.extensibility.visual.visualUtils {
             }
         }
 
-        // /Events
-
-        private applySelectionToTheVisual(): void {
+        private applySelectionToTheVisual(e: MouseEvent): void {
             if (this.selectionStates.indexOf('justSelected') > -1 && this.selectionStates.indexOf('justRemoved') !== -1) {
                 throw new Error('"justSelected" and "justRemoved" items can\'t appear at the same time!');
             }
-            let allDataPoints: VisualDataPoint[] = this.visual.getAllDataPoints();
-            let handledDataPoints: VisualDataPoint[] = [];
+            const allDataPoints: VisualDataPoint[] = this.visual.getAllDataPoints();
+            const handledDataPoints: VisualDataPoint[] = [];
 
-            let isMultiselect: boolean = (d3.event as MouseEvent).ctrlKey;
+            const isMultiselect: boolean = e.ctrlKey;
 
             for (let i: number = 0; i < allDataPoints.length; i++) {
-                switch ( this.selectionStates[i] ) {
+                switch (this.selectionStates[i]) {
                     case 'justSelected' :
                         this.selectionStates[i] = 'selected';
                         handledDataPoints.push(allDataPoints[i]);
                         break;
                     case 'justRemoved' :
                         this.selectionStates[i] = null;
-
                         handledDataPoints.push(allDataPoints[i]);
-
                         break;
                 }
             }
@@ -278,40 +282,36 @@ module powerbi.extensibility.visual.visualUtils {
 
         // DOM
         private updateFillOpacity(): void {
-            let scrollIndex: number = this.indexOfFirstVisibleDataPoint;
+            const scrollIndex: number = this.indexOfFirstVisibleDataPoint;
             if ( this.selectionStates.indexOf('selected') === -1 && this.selectionStates.indexOf('justSelected') === -1 ) {
                 for (let i: number = 0; i < this.visibleBars.length; i++) {
-                    d3.select(this.visibleBars[i]).style({
-                        'fill-opacity': DefaultOpacity,
-                    });
+                    d3.select(this.visibleBars[i])
+                    .style('fill-opacity', DefaultOpacity);
                 }
             } else {
                 for (let i: number = 0; i < this.visibleBars.length; i++) {
-                    let bar: HTMLElement = this.visibleBars[i];
-                    let d3_bar: d3.Selection<SVGRectElement> = d3.select(bar);
+                    const bar: HTMLElement = this.visibleBars[i];
+                    const d3_bar: d3Selection<SVGRectElement> = d3.select(bar);
                     if (
                         this.selectionStates[i + scrollIndex] === 'selected'
                         || this.selectionStates[i + scrollIndex] === 'justSelected'
                     ) {
-                        d3_bar.style({
-                            'fill-opacity': DefaultOpacity
-                        });
+                        d3_bar.style(
+                            'fill-opacity', DefaultOpacity
+                        );
                     } else {
-                        d3_bar.style({
-                            'fill-opacity': DimmedOpacity
-                        });
+                        d3_bar.style(
+                            'fill-opacity', DimmedOpacity
+                        );
                     }
                 }
             }
         }
-        // /DOM
-
 
         // Arrays manipulate
         private emptySelection(): void {
             this.selectionStates = [];
         }
-        // / Arrays manipulate
 
         // Rect
         private showRect(): void {
@@ -323,21 +323,25 @@ module powerbi.extensibility.visual.visualUtils {
         }
 
         private setRectPos(x: number, y: number): void {
-            this.selection.rect.style({
-                left: x.toString() + 'px',
-                top: y.toString() + 'px'
-            });
+            this.selection.rect.style(
+                "left", x.toString() + 'px',
+            );
+            this.selection.rect.style(
+                "top", y.toString() + 'px'
+            );
         }
 
         private setRectSize(width: number, height: number): void {
-            this.selection.rect.style({
-                width: width.toString() + 'px',
-                height: height.toString() + 'px'
-            });
+            this.selection.rect.style(
+                "width", width.toString() + 'px',
+            );
+            this.selection.rect.style(
+                "height", height.toString() + 'px'
+            );
         }
 
         private calculateRectDimensions(cursor: CursorPosition): void {
-            let selection: Selection = this.selection;
+            const selection: Selection = this.selection;
 
             if (selection.startX <= cursor.x) {
                 selection.x = selection.startX;
@@ -365,7 +369,7 @@ module powerbi.extensibility.visual.visualUtils {
             this.selection.active = false;
             this.selection.action = 'add';
             this.hideRect();
-            let backgroundStyle: string = this.selection.rect_node.style.backgroundColor;
+            const backgroundStyle: string = this.selection.rect_node.style.backgroundColor;
             this.selection.rect_node.setAttribute('style', '');
             this.selection.rect_node.style.backgroundColor = backgroundStyle;
         }
@@ -374,24 +378,20 @@ module powerbi.extensibility.visual.visualUtils {
 
         // Utils
         private detectCollision(bar: HTMLElement): boolean {
-            let bounds: ClientRect = bar.getBoundingClientRect();
+            const bounds: ClientRect = bar.getBoundingClientRect();
 
-            if (bounds.height === 0) {
+            if (bounds.width === 0) {
                 return false;
             }
 
-            if (
-                this.selection.x <= bounds.right
+            if (this.selection.x <= bounds.right
                 && this.selection.x + this.selection.width >= bounds.left
                 && this.selection.y <= bounds.bottom
-                && this.selection.y + this.selection.height >= bounds.top
-            ) {
+                && this.selection.y + this.selection.height >= bounds.top) {
+
                 return true;
             } else {
                 return false;
             }
         }
-        // / Utils
-
     }
-}
