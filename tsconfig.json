@@ -11,12 +11,14 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "lib": [
-        "es2015",
-        "dom"
+      "es2015",
+      "dom"
     ]
-
   },
   "files": [
     "src/visual.ts"
+  ],
+  "include": [
+    "./src/**/*.ts"
   ]
 }

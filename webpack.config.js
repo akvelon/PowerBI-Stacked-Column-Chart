@@ -1,42 +1,42 @@
 const path = require('path');
-const fs = require("fs");
+const fs = require('fs');
 
 // werbpack plugin
-const webpack = require("webpack");
+const webpack = require('webpack');
 const PowerBICustomVisualsWebpackPlugin = require('powerbi-visuals-webpack-plugin');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const Visualizer = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const ExtraWatchWebpackPlugin = require('extra-watch-webpack-plugin');
 
 // api configuration
-const powerbiApi = require("powerbi-visuals-api");
+const powerbiApi = require('powerbi-visuals-api');
 
 // visual configuration json path
-const pbivizPath = "./pbiviz.json";
+const pbivizPath = './pbiviz.json';
 const pbivizFile = require(path.join(__dirname, pbivizPath));
 
 // the visual capabilities content
-const capabilitiesPath = "./capabilities.json";
+const capabilitiesPath = './capabilities.json';
 const capabilitiesFile = require(path.join(__dirname, capabilitiesPath));
 
 const pluginLocation = './.tmp/precompile/visualPlugin.ts'; // path to visual plugin file, the file generates by the plugin
 
 // string resources
-const resourcesFolder = path.join(".", "stringResources");
+const resourcesFolder = path.join('.', 'stringResources');
 const localizationFolders = fs.existsSync(resourcesFolder) && fs.readdirSync(resourcesFolder);
-const statsLocation = "../../webpack.statistics.html";
+const statsLocation = '../../webpack.statistics.html';
 
 // babel options to support IE11
 let babelOptions = {
-    "presets": [
+    'presets': [
         [
             require.resolve('@babel/preset-env'),
             {
-                useBuiltIns: "entry",
+                useBuiltIns: 'entry',
                 corejs: 3,
-                modules: false
-            }
-        ]
+                modules: false,
+            },
+        ],
     ],
     plugins: [
         [
@@ -46,28 +46,28 @@ let babelOptions = {
             },
         ],
     ],
-    sourceType: "unambiguous", // tell to babel that the project can contains different module types, not only es2015 modules
-    cacheDirectory: path.join(".tmp", "babelCache") // path for chace files
+    sourceType: 'unambiguous', // tell to babel that the project can contains different module types, not only es2015 modules
+    cacheDirectory: path.join('.tmp', 'babelCache'), // path for chace files
 };
 
 module.exports = {
     entry: {
-        "visual": pluginLocation
+        'visual': pluginLocation,
     },
     optimization: {
         concatenateModules: false,
-        minimize: true // enable minimization for create *.pbiviz file less than 2 Mb, can be disabled for dev mode
+        minimize: true, // enable minimization for create *.pbiviz file less than 2 Mb, can be disabled for dev mode
     },
     devtool: 'source-map',
-    mode: "development",
+    mode: 'development',
     module: {
         rules: [
             {
                 parser: {
-                    amd: false
-                }
+                    amd: false,
+                },
             },
-            {test: /webpack-dev-server\\client/, loader: "null-loader"},
+            {test: /webpack-dev-server\\client/, loader: 'null-loader'},
             {
                 test: /(\.ts)x|\.ts$/,
                 use: [
@@ -80,8 +80,7 @@ module.exports = {
                                     require.resolve('babel-plugin-module-resolver'),
                                     {
                                         root: ['./'],
-                                        alias: {
-                                        },
+                                        alias: {},
                                     },
                                 ],
                             ],
@@ -92,77 +91,76 @@ module.exports = {
                         options: {
                             transpileOnly: false,
                             experimentalWatchApi: false,
-                        }
-                    }
+                        },
+                    },
                 ],
                 exclude: [/node_modules/],
-                include: /powerbi-visuals-|src|precompile\\visualPlugin.ts/,
+                include: /.tmp|powerbi-visuals-|src|precompile\\visualPlugin.ts/,
             },
             {
                 test: /(\.js)x|\.js$/,
                 use: [
                     {
                         loader: require.resolve('babel-loader'),
-                        options: babelOptions
-                    }
+                        options: babelOptions,
+                    },
                 ],
-                exclude: [/node_modules/]
+                exclude: [/node_modules/],
             },
             {
                 test: /\.json$/,
                 loader: require.resolve('json-loader'),
-                type: "javascript/auto"
+                type: 'javascript/auto',
             },
             {
                 test: /\.less$/,
                 use: [
                     {
-                        loader: MiniCssExtractPlugin.loader
+                        loader: MiniCssExtractPlugin.loader,
                     },
                     {
-                        loader: require.resolve('css-loader')
+                        loader: require.resolve('css-loader'),
                     },
                     {
                         loader: require.resolve('less-loader'),
                         options: {
-                            lessOptions:{
-                                paths: [path.resolve(__dirname, "..", 'node_modules')]
-                            }
-                        }
-                    }
-                ]
+                            lessOptions: {
+                                paths: [path.resolve(__dirname, '..', 'node_modules')],
+                            },
+                        },
+                    },
+                ],
             },
             {
                 test: /\.css$/,
                 use: [
                     {
-                        loader: MiniCssExtractPlugin.loader
+                        loader: MiniCssExtractPlugin.loader,
                     },
                     {
-                        loader: require.resolve('css-loader')
-                    }
-                ]
+                        loader: require.resolve('css-loader'),
+                    },
+                ],
             },
             {
                 test: /\.(woff|ttf|ico|woff2|jpg|jpeg|png|webp|svg)$/i,
                 use: [
                     {
-                        loader: 'base64-inline-loader'
-                    }
-                ]
-            }
-        ]
+                        loader: 'base64-inline-loader',
+                    },
+                ],
+            },
+        ],
     },
     resolve: {
         extensions: ['.tsx', '.ts', '.jsx', '.js', '.css'],
-        alias: {
-        },
+        alias: {},
     },
     output: {
         publicPath: '/assets',
-        path: path.join(__dirname, "/.tmp", "drop"),
-        library: +powerbiApi.version.replace(/\./g, "") >= 320 ? pbivizFile.visual.guid : undefined,
-        libraryTarget: +powerbiApi.version.replace(/\./g, "") >= 320 ? 'var' : undefined,
+        path: path.join(__dirname, '/.tmp', 'drop'),
+        library: +powerbiApi.version.replace(/\./g, '') >= 320 ? pbivizFile.visual.guid : undefined,
+        libraryTarget: +powerbiApi.version.replace(/\./g, '') >= 320 ? 'var' : undefined,
     },
     devServer: {
         static: false,
@@ -170,40 +168,39 @@ module.exports = {
         port: 8080, // dev server port
         hot: false,
         liveReload: false,
-        https: {
-        },
+        https: {},
         headers: {
-            "access-control-allow-origin": "*",
-            "cache-control": "public, max-age=0"
+            'access-control-allow-origin': '*',
+            'cache-control': 'public, max-age=0',
         },
     },
-    externals: powerbiApi.version.replace(/\./g, "") >= 320 ?
+    externals: powerbiApi.version.replace(/\./g, '') >= 320 ?
         {
-            "powerbi-visuals-api": 'null',
-            "fakeDefine": 'false',
+            'powerbi-visuals-api': 'null',
+            'fakeDefine': 'false',
         } :
         {
-            "powerbi-visuals-api": 'null',
-            "fakeDefine": 'false',
-            "corePowerbiObject": "Function('return this.powerbi')()",
-            "realWindow": "Function('return this')()"
+            'powerbi-visuals-api': 'null',
+            'fakeDefine': 'false',
+            'corePowerbiObject': 'Function(\'return this.powerbi\')()',
+            'realWindow': 'Function(\'return this\')()',
         },
     plugins: [
         new MiniCssExtractPlugin({
-            filename: "visual.css",
-            chunkFilename: "[id].css"
+            filename: 'visual.css',
+            chunkFilename: '[id].css',
         }),
         new Visualizer({
             reportFilename: statsLocation,
             openAnalyzer: false,
-            analyzerMode: `static`
+            analyzerMode: `static`,
         }),
         // visual plugin regenerates with the visual source, but it does not require relaunching dev server
         new webpack.WatchIgnorePlugin({
             paths: [
                 path.join(__dirname, pluginLocation),
-                "./.tmp/**/*.*"
-            ]
+                './.tmp/**/*.*',
+            ],
         }),
         // custom visuals plugin instance with options
         new PowerBICustomVisualsWebpackPlugin({
@@ -213,7 +210,7 @@ module.exports = {
             stringResources: localizationFolders && localizationFolders.map(localization => path.join(
                 resourcesFolder,
                 localization,
-                "resources.resjson"
+                'resources.resjson',
             )),
             apiVersion: powerbiApi.version,
             capabilitiesSchema: powerbiApi.schemas.capabilities,
@@ -224,24 +221,24 @@ module.exports = {
             generatePbiviz: true,
             generateResources: true,
             modules: true,
-            visualSourceLocation: "../../src/visual",
+            visualSourceLocation: '../../src/visual',
             pluginLocation: pluginLocation,
-            packageOutPath: path.join(__dirname, "dist")
+            packageOutPath: path.join(__dirname, 'dist'),
         }),
         new ExtraWatchWebpackPlugin({
             files: [
                 pbivizPath,
-                capabilitiesPath
-            ]
+                capabilitiesPath,
+            ],
         }),
-        powerbiApi.version.replace(/\./g, "") >= 320 ?
+        powerbiApi.version.replace(/\./g, '') >= 320 ?
             new webpack.ProvidePlugin({
                 define: 'fakeDefine',
             }) :
             new webpack.ProvidePlugin({
                 window: 'realWindow',
                 define: 'fakeDefine',
-                powerbi: 'corePowerbiObject'
-            })
-    ]
+                powerbi: 'corePowerbiObject',
+            }),
+    ],
 };

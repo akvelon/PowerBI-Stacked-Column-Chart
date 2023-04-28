@@ -1,7 +1,7 @@
 /* eslint-disable max-lines-per-function */
-"use strict";
+'use strict';
 
-import powerbiApi from "powerbi-visuals-api";
+import powerbiApi from 'powerbi-visuals-api';
 import DataView = powerbiApi.DataView;
 import IVisualHost = powerbiApi.extensibility.visual.IVisualHost;
 import IVisual = powerbiApi.extensibility.IVisual;
@@ -18,74 +18,99 @@ import VisualObjectInstanceEnumerationObject = powerbiApi.VisualObjectInstanceEn
 import VisualObjectInstance = powerbiApi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbiApi.EnumerateVisualObjectInstancesOptions;
 
-import { interactivityBaseService, interactivitySelectionService } from "powerbi-visuals-utils-interactivityutils";
+import {interactivityBaseService, interactivitySelectionService} from 'powerbi-visuals-utils-interactivityutils';
 import IInteractivityService = interactivityBaseService.IInteractivityService;
 import ISelectionHandler = interactivityBaseService.ISelectionHandler;
 import createInteractivityService = interactivitySelectionService.createInteractivitySelectionService;
 import IInteractiveBehavior = interactivityBaseService.IInteractiveBehavior;
 
-import { RenderVisual } from "./render/renderVisual";
-import { RenderAxes } from "./render/renderAxes";
-import { axis } from "powerbi-visuals-utils-chartutils";
-import { getValueForFormatter } from "./utils/formattingUtils";
+import {RenderVisual} from './render/renderVisual';
+import {RenderAxes} from './render/renderAxes';
+import {axis} from 'powerbi-visuals-utils-chartutils';
+import {getValueForFormatter} from './utils/formattingUtils';
 import * as formattingUtils from './utils/formattingUtils';
 
-import { interfaces, valueFormatter as ValueFormatter, textMeasurementService, valueFormatter} from "powerbi-visuals-utils-formattingutils";
+import {
+    interfaces,
+    valueFormatter as ValueFormatter,
+    textMeasurementService,
+    valueFormatter,
+} from 'powerbi-visuals-utils-formattingutils';
 import TextProperties = interfaces.TextProperties;
 import IValueFormatter = ValueFormatter.IValueFormatter;
 
-import * as visualUtils from "./utils";
-import * as scrollbarUtil from "./scrollbarUtil";
-import * as metadataUtils from "./metadataUtils";
-import * as legendUtils from "./utils/legendUtils";
-import * as selectionSaveUtils from "./selectionSaveUtils";
-import { WebBehavior, WebBehaviorOptions } from "./behavior"
+import * as visualUtils from './utils';
+import * as scrollbarUtil from './scrollbarUtil';
+import * as metadataUtils from './metadataUtils';
+import * as legendUtils from './utils/legendUtils';
+import * as selectionSaveUtils from './selectionSaveUtils';
+import {WebBehavior, WebBehaviorOptions} from './behavior';
 
 import ScrollbarState = scrollbarUtil.ScrollbarState;
 
-import { CssConstants, IMargin, manipulation as svg } from "powerbi-visuals-utils-svgutils";
+import {CssConstants, IMargin, manipulation as svg} from 'powerbi-visuals-utils-svgutils';
 
 import * as d3 from 'd3-selection';
-import {  d3Selection as d3Selection, d3Update } from "./utils";
+import {d3Selection as d3Selection, d3Update} from './utils';
 
-import "../style/visual.less";
+import '../style/visual.less';
 
-import { AxisRangeType, LabelPosition, LayoutMode, legendSettings, smallMultipleSettings, VisualSettings } from "./settings";
-import { AxesDomains, CategoryDataPoints, IAxes, IAxesSize, ISize, LegendProperties, LegendSize, SmallMultipleSizeOptions, VisualData, VisualDataPoint, VisualMeasureMetadata, VisualTranslation } from "./visualInterfaces";
+import {
+    AxisRangeType,
+    LabelPosition,
+    LayoutMode,
+    legendSettings,
+    smallMultipleSettings,
+    VisualSettings,
+} from './settings';
+import {
+    AxesDomains,
+    CategoryDataPoints,
+    IAxes,
+    IAxesSize,
+    ISize,
+    LegendProperties,
+    LegendSize,
+    SmallMultipleSizeOptions,
+    VisualData,
+    VisualDataPoint,
+    VisualMeasureMetadata,
+    VisualTranslation,
+} from './visualInterfaces';
 
-import { CustomLegendBehavior } from "./customLegendBehavior";
+import {CustomLegendBehavior} from './customLegendBehavior';
 
-import { legendInterfaces } from "powerbi-visuals-utils-chartutils";
+import {legendInterfaces} from 'powerbi-visuals-utils-chartutils';
 import ILegend = legendInterfaces.ILegend;
 
-import { legend } from "powerbi-visuals-utils-chartutils";
+import {legend} from 'powerbi-visuals-utils-chartutils';
 import createLegend = legend.createLegend;
 
-import { DataViewConverter, Field } from "./dataViewConverter";
-import { EnumerateObject } from "./enumerateObject";
-import { ITooltipServiceWrapper, createTooltipServiceWrapper } from "powerbi-visuals-utils-tooltiputils";
+import {DataViewConverter, Field} from './dataViewConverter';
+import {EnumerateObject} from './enumerateObject';
+import {ITooltipServiceWrapper, createTooltipServiceWrapper} from 'powerbi-visuals-utils-tooltiputils';
 
-import { pixelConverter as PixelConverter} from "powerbi-visuals-utils-typeutils";
+import {pixelConverter as PixelConverter} from 'powerbi-visuals-utils-typeutils';
 
-import { LassoSelection } from "./lassoSelectionUtil";
-import { LassoSelectionForSmallMultiple } from "./lassoSelectionUtilForSmallMultiple";
-import { SelectableDataPoint } from "powerbi-visuals-utils-interactivityutils/lib/interactivitySelectionService";
+import {LassoSelection} from './lassoSelectionUtil';
+import {LassoSelectionForSmallMultiple} from './lassoSelectionUtilForSmallMultiple';
+import {SelectableDataPoint} from 'powerbi-visuals-utils-interactivityutils/lib/interactivitySelectionService';
 
-import * as axisUtils from "./utils/axis/yAxisUtils";
+import * as axisUtils from './utils/axis/yAxisUtils';
 
 class Selectors {
-    public static MainSvg = CssConstants.createClassAndSelector("bar-chart-svg");
-    public static VisualSvg = CssConstants.createClassAndSelector("bar-chart-visual");
-    public static BarSelect = CssConstants.createClassAndSelector("bar");
-    public static BarGroupSelect = CssConstants.createClassAndSelector("bar-group");
-    public static AxisGraphicsContext = CssConstants.createClassAndSelector("axisGraphicsContext");
-    public static AxisLabelSelector = CssConstants.createClassAndSelector("axisLabel");
-    public static LabelGraphicsContext = CssConstants.createClassAndSelector("labelGraphicsContext");
-    public static LabelBackgroundContext = CssConstants.createClassAndSelector("labelBackgroundContext");
+    public static MainSvg = CssConstants.createClassAndSelector('bar-chart-svg');
+    public static VisualSvg = CssConstants.createClassAndSelector('bar-chart-visual');
+    public static BarSelect = CssConstants.createClassAndSelector('bar');
+    public static BarGroupSelect = CssConstants.createClassAndSelector('bar-group');
+    public static AxisGraphicsContext = CssConstants.createClassAndSelector('axisGraphicsContext');
+    public static AxisLabelSelector = CssConstants.createClassAndSelector('axisLabel');
+    public static LabelGraphicsContext = CssConstants.createClassAndSelector('labelGraphicsContext');
+    public static LabelBackgroundContext = CssConstants.createClassAndSelector('labelBackgroundContext');
 }
 
 export class Visual implements IVisual {
-    public static DefaultColor: string = "#777777";
+    public static DefaultColor: string = '#777777';
 
     private allDataPoints: VisualDataPoint[];
     public categoriesCount: number;
@@ -121,7 +146,7 @@ export class Visual implements IVisual {
     public legendSize;
     public maxXLabelsWidth: number;
 
-    public static DefaultStrokeSelectionColor: string = "#000";
+    public static DefaultStrokeSelectionColor: string = '#000';
     public static DefaultStrokeWidth: number = 1;
     public static DefaultStrokeSelectionWidth: number = 1;
 
@@ -174,43 +199,43 @@ export class Visual implements IVisual {
 
         this.interactivityService = createInteractivityService(this.host);
 
-        const customLegendBehavior = new CustomLegendBehavior( this.saveSelection.bind(this) );
+        const customLegendBehavior = new CustomLegendBehavior(this.saveSelection.bind(this));
         this.legend = createLegend(
             this.mainHtmlElement,
             false,
             this.interactivityService,
             true,
             null,
-            customLegendBehavior
+            customLegendBehavior,
         );
-        
+
         this.behavior = new WebBehavior(this);
-        
-        this.legendElementRoot = this.mainElement.selectAll("svg.legend");
-        this.legendElement = this.mainElement.selectAll("svg.legend").selectAll("g");
+
+        this.legendElementRoot = this.mainElement.selectAll('svg.legend');
+        this.legendElement = this.mainElement.selectAll('svg.legend').selectAll('g');
     }
 
     saveSelection(): void {
         const selected = this.mainElement.selectAll<any, SelectableDataPoint>(`.legendItem, ${Selectors.BarSelect.selectorName}`)
-            .filter(d => d.selected)
+            .filter(d => d.selected);
 
         const data: any[] = selected.data();
-        
+
         selectionSaveUtils.saveSelection(data, this.host);
     }
 
     public clearAll() {
         if (this.isSmallMultiple()) {
-            this.mainElement.selectAll(".selection-rect").remove();
-            this.mainDivElement.selectAll("*").remove();
+            this.mainElement.selectAll('.selection-rect').remove();
+            this.mainDivElement.selectAll('*').remove();
         } else {
             this.barGroup && this.barGroup.selectAll(Selectors.BarGroupSelect.selectorName).remove();
-            this.xAxisSvgGroup && this.xAxisSvgGroup.selectAll("*").remove();
-            this.yAxisSvgGroup && this.yAxisSvgGroup.selectAll("*").remove();
-            this.legendElement && this.legendElement.selectAll("*").remove();
-            this.labelGraphicsContext && this.labelGraphicsContext.selectAll("*").remove();
-            this.labelBackgroundContext && this.labelBackgroundContext.selectAll("*").remove();
-        }            
+            this.xAxisSvgGroup && this.xAxisSvgGroup.selectAll('*').remove();
+            this.yAxisSvgGroup && this.yAxisSvgGroup.selectAll('*').remove();
+            this.legendElement && this.legendElement.selectAll('*').remove();
+            this.labelGraphicsContext && this.labelGraphicsContext.selectAll('*').remove();
+            this.labelBackgroundContext && this.labelBackgroundContext.selectAll('*').remove();
+        }
     }
 
     private optionsAreValid(options: VisualUpdateOptions) {
@@ -236,7 +261,7 @@ export class Visual implements IVisual {
         this.maxXLabelsWidth = null;
         this.dataPointsByCategories = this.buildDataPointsByCategoriesArray();
 
-        this.hasHighlight = this.allDataPoints.filter(x => x.highlight).length > 0;                
+        this.hasHighlight = this.allDataPoints.filter(x => x.highlight).length > 0;
 
         this.categoriesCount = this.dataPointsByCategories.length;
 
@@ -244,15 +269,15 @@ export class Visual implements IVisual {
 
         this.lassoSelection.init(this.mainElement);
 
-        if (this.isLegendNeeded) {                
+        if (this.isLegendNeeded) {
             legendUtils.renderLegend(this.legend, this.mainSvgElement, options.viewport, this.legendProperties);
         } else {
-            this.legendElement && this.legendElement.selectAll("*").remove();
+            this.legendElement && this.legendElement.selectAll('*').remove();
             this.mainSvgElement && this.mainSvgElement
-            .style("margin-top", 0)
-            .style("margin-bottom", 0)
-            .style("margin-left", 0)
-            .style("margin-right", 0);
+                .style('margin-top', 0)
+                .style('margin-bottom', 0)
+                .style('margin-left', 0)
+                .style('margin-right', 0);
         }
 
         this.calculateOffsets();
@@ -273,7 +298,7 @@ export class Visual implements IVisual {
             legendData: this.legendProperties.data,
             hasHighlight: this.hasHighlight,
             isLegendNeeded: this.isLegendNeeded,
-            isSmallMultiple: this.isSmallMultiple()
+            isSmallMultiple: this.isSmallMultiple(),
         };
 
         // render for calculate width of labels text
@@ -300,15 +325,15 @@ export class Visual implements IVisual {
         this.renderAxes();
         RenderAxes.rotateXAxisTickLabels(this.isNeedToRotate, this.xAxisSvgGroup);
         this.finalRendering();
-        
+
         this.scrollBar.update();
 
         const bars = this.barGroup.selectAll(Selectors.BarSelect.selectorName).data(visibleDataPoints);
         this.LassoSelectionForSmallMultiple.disable();
         this.lassoSelection.update(bars);
 
-        if ( this.settings.constantLine.show && this.settings.constantLine.value ){
-            const xWidth: number = (<Element>this.yAxisSvgGroup.selectAll("line").node()).getBoundingClientRect().width;
+        if (this.settings.constantLine.show && this.settings.constantLine.value) {
+            const xWidth: number = (<Element>this.yAxisSvgGroup.selectAll('line').node()).getBoundingClientRect().width;
             RenderVisual.renderConstantLine(this.settings.constantLine, this.barGroup, axes, xWidth);
         }
     }
@@ -316,45 +341,45 @@ export class Visual implements IVisual {
     private createNormalChartElements(): void {
         this.prepareMainSvgElementForNormalChart();
 
-        this.chartsContainer = this.mainSvgElement.append("g").attr('id', 'chartsContainer');
-        
+        this.chartsContainer = this.mainSvgElement.append('g').attr('id', 'chartsContainer');
+
         // Append SVG groups for X and Y axes.
-        this.xAxisSvgGroup = this.chartsContainer.append("g").attr('id', 'xAxisSvgGroup');
-        this.yAxisSvgGroup = this.chartsContainer.append("g").attr('id', 'yAxisSvgGroup');
+        this.xAxisSvgGroup = this.chartsContainer.append('g').attr('id', 'xAxisSvgGroup');
+        this.yAxisSvgGroup = this.chartsContainer.append('g').attr('id', 'yAxisSvgGroup');
         // Append an svg group that will contain our visual
-        this.barGroup = this.chartsContainer.append("g").attr('id', 'barGroup');
+        this.barGroup = this.chartsContainer.append('g').attr('id', 'barGroup');
 
         this.axisGraphicsContext = this.chartsContainer
-            .append("g")
-            .attr("class", Selectors.AxisGraphicsContext.className);
+            .append('g')
+            .attr('class', Selectors.AxisGraphicsContext.className);
 
         this.labelBackgroundContext = this.chartsContainer
-            .append("g")
+            .append('g')
             .classed(Selectors.LabelBackgroundContext.className, true);
 
         this.labelGraphicsContext = this.chartsContainer
-            .append("g")
+            .append('g')
             .classed(Selectors.LabelGraphicsContext.className, true);
 
         this.mainElement.select('.scrollbar-track').remove();
-        
+
         this.scrollBar.init(this.mainElement);
     }
 
-    private prepareMainSvgElementForNormalChart(): void{
-        if ( this.mainDivElement ){
+    private prepareMainSvgElementForNormalChart(): void {
+        if (this.mainDivElement) {
             this.mainDivElement.remove();
             this.mainDivElement = null;
         }
-        
+
         // This SVG will contain our visual
-        if ( this.mainSvgElement ){
-            this.mainSvgElement.selectAll("*").remove();
+        if (this.mainSvgElement) {
+            this.mainSvgElement.selectAll('*').remove();
         } else {
             this.mainSvgElement = this.mainElement.append('svg')
-            .classed(Selectors.MainSvg.className, true)
-            .attr("width", "100%")
-            .attr("height", "100%");
+                .classed(Selectors.MainSvg.className, true)
+                .attr('width', '100%')
+                .attr('height', '100%');
         }
     }
 
@@ -362,7 +387,6 @@ export class Visual implements IVisual {
         if (!this.optionsAreValid(options)) {
             return;
         }
-        debugger;
 
         const dataView = options && options.dataViews && options.dataViews[0];
 
@@ -380,7 +404,7 @@ export class Visual implements IVisual {
 
         this.allDataPoints = DataViewConverter.Convert(dataView, this.host, this.settings, this.legendProperties.colors);
 
-        if ( this.isSmallMultiple() ) {
+        if (this.isSmallMultiple()) {
             this.smallMultipleProcess(options.viewport);
         } else {
             this.normalChartProcess(options);
@@ -400,7 +424,7 @@ export class Visual implements IVisual {
             return savedSelection.some(savedD => savedD.identity.key === (<any>d).identity.key);
         });
 
-        if (selected.length > 0){
+        if (selected.length > 0) {
             this.webBehaviorSelectionHandler.handleSelection(selected, false);
         }
     }
@@ -417,7 +441,7 @@ export class Visual implements IVisual {
 
         const textProperties: TextProperties = {
             fontFamily: settings.fontFamily,
-            fontSize: PixelConverter.toString(settings.fontSize)
+            fontSize: PixelConverter.toString(settings.fontSize),
         };
 
         const height: number = textMeasurementService.measureSvgTextHeight(textProperties),
@@ -431,14 +455,14 @@ export class Visual implements IVisual {
         return 35;
     }
 
-    public calculateXAxisSize(settings: VisualSettings): number {      
+    public calculateXAxisSize(settings: VisualSettings): number {
 
         const fontSize: string = PixelConverter.toString(settings.categoryAxis.fontSize);
         const fontFamily: string = settings.categoryAxis.fontFamily;
 
         const textProperties: TextProperties = {
             fontFamily: fontFamily,
-            fontSize: fontSize
+            fontSize: fontSize,
         };
 
         const height: number = textMeasurementService.measureSvgTextHeight(textProperties);
@@ -446,25 +470,25 @@ export class Visual implements IVisual {
         return height + 8;
     }
 
-    public calculateXAxisSizeForCategorical(values: PrimitiveValue[], settings: VisualSettings, metadata: VisualMeasureMetadata, barHeight: number): number {      
+    public calculateXAxisSizeForCategorical(values: PrimitiveValue[], settings: VisualSettings, metadata: VisualMeasureMetadata, barHeight: number): number {
         let formatter: IValueFormatter;
 
         if ((values.some(x => x && typeof (<any>x).getMonth === 'function'))) {
             if (metadata.cols.category) {
                 formatter = valueFormatter.create({
                     format: valueFormatter.getFormatStringByColumn(<any>metadata.cols.category, true) || metadata.cols.category.format,
-                    cultureSelector: this.host.locale
+                    cultureSelector: this.host.locale,
                 });
             } else if (metadata.groupingColumn) {
                 formatter = valueFormatter.create({
                     format: valueFormatter.getFormatStringByColumn(<any>metadata.groupingColumn, true) || metadata.groupingColumn.format,
-                    cultureSelector: this.host.locale
+                    cultureSelector: this.host.locale,
                 });
             }
         } else {
             const yAxisFormatString: string = valueFormatter.getFormatStringByColumn(<any>metadata.cols.category) || valueFormatter.getFormatStringByColumn(<any>metadata.groupingColumn);
 
-            formatter = valueFormatter.create({ format: yAxisFormatString });
+            formatter = valueFormatter.create({format: yAxisFormatString});
         }
 
         const fontSize: string = PixelConverter.toString(settings.categoryAxis.fontSize);
@@ -476,14 +500,14 @@ export class Visual implements IVisual {
             const textProperties: TextProperties = {
                 text: formatter.format(value),
                 fontFamily: fontFamily,
-                fontSize: fontSize
+                fontSize: fontSize,
             };
 
             const width: number = textMeasurementService.measureSvgTextWidth(textProperties);
             maxWidth = width > maxWidth ? width : maxWidth;
         });
 
-        if (maxWidth >= barHeight ) {
+        if (maxWidth >= barHeight) {
             return maxWidth + 4;
         }
 
@@ -491,25 +515,25 @@ export class Visual implements IVisual {
     }
 
     public prepareMainDiv(el: d3Selection<any>) {
-        if ( this.mainSvgElement ){
+        if (this.mainSvgElement) {
             this.mainSvgElement.remove();
             this.mainSvgElement = null;
         }
 
         if (this.mainDivElement) {
-            this.mainDivElement.selectAll("*").remove();
+            this.mainDivElement.selectAll('*').remove();
         } else {
-            this.mainDivElement = el.append("div");
+            this.mainDivElement = el.append('div');
         }
     }
 
     private calculateChartSize(viewport: IViewport,
-        settings: smallMultipleSettings,
-        leftSpace: number, 
-        topSpace: number, 
-        rows: number, 
-        columns: number,
-        legendSize: LegendSize): SmallMultipleSizeOptions {
+                               settings: smallMultipleSettings,
+                               leftSpace: number,
+                               topSpace: number,
+                               rows: number,
+                               columns: number,
+                               legendSize: LegendSize): SmallMultipleSizeOptions {
 
         const scrollHeight: number = 22,
             scrollWidth: number = 20,
@@ -520,7 +544,7 @@ export class Visual implements IVisual {
         let chartHeight: number = 0;
         let chartWidth: number = 0;
 
-        if(settings.layoutMode === LayoutMode.Matrix) {
+        if (settings.layoutMode === LayoutMode.Matrix) {
             const clientHeight: number = viewport.height - topSpace - scrollHeight - legendSize.height;
             const clientWidth: number = viewport.width - leftSpace - scrollWidth - legendSize.width;
 
@@ -530,7 +554,7 @@ export class Visual implements IVisual {
             const clientHeight: number = viewport.height - scrollHeight - legendSize.height;
             const clientWidth: number = viewport.width - leftSpace - scrollWidth - legendSize.width;
 
-            chartHeight = (clientHeight - gapBetweenCharts * rows - topSpace * rows ) / rows;
+            chartHeight = (clientHeight - gapBetweenCharts * rows - topSpace * rows) / rows;
             chartWidth = (clientWidth - gapBetweenCharts * (columns)) / columns;
         }
 
@@ -549,14 +573,14 @@ export class Visual implements IVisual {
             height: isVerticalScrollBarNeeded ? minHeight : chartHeight,
             width: isHorizontalScrollBarNeeded ? minWidth : chartWidth,
             isHorizontalSliderNeeded: isHorizontalScrollBarNeeded,
-            isVerticalSliderNeeded: isVerticalScrollBarNeeded
-        }
+            isVerticalSliderNeeded: isVerticalScrollBarNeeded,
+        };
     }
 
     private createSmallMultipleAxesByDomains(categoryDomain: any[], valueDomain: any[], visualSize: ISize, maxYAxisLabelWidth: number, categoriesCount: number = null): IAxes {
         const axesDomains: AxesDomains = {
             yAxisDomain: valueDomain,
-            xAxisDomain: categoryDomain
+            xAxisDomain: categoryDomain,
         };
         const barHeight: number = categoriesCount ? visualSize.width / (categoriesCount > 2 ? categoriesCount + 1 : categoriesCount) : 0;
 
@@ -567,7 +591,7 @@ export class Visual implements IVisual {
             this.settings,
             this.host,
             true,
-            barHeight
+            barHeight,
         );
 
         return axes;
@@ -580,7 +604,7 @@ export class Visual implements IVisual {
             this.settings,
             xAxisSvgGroup,
             yAxisSvgGroup,
-            axes
+            axes,
         );
     }
 
@@ -589,9 +613,9 @@ export class Visual implements IVisual {
         const uniqueColumns: PrimitiveValue[] = this.allDataPoints.map(x => x.columnBy).filter((v, i, a) => a.indexOf(v) === i);
         const uniqueRows: PrimitiveValue[] = this.allDataPoints.map(x => x.rowBy).filter((v, i, a) => a.indexOf(v) === i);
         const uniqueCategories: PrimitiveValue[] = this.allDataPoints.map(x => x.category).filter((v, i, a) => a.indexOf(v) === i);
-        
+
         const leftSpace: number = uniqueRows && uniqueRows.length === 1 && uniqueRows[0] === null ? 0 : this.calculateLabelsSize(this.settings.smallMultiple);
-        const topSpace: number = this.calculateTopSpace(this.settings.smallMultiple);            
+        const topSpace: number = this.calculateTopSpace(this.settings.smallMultiple);
 
         const hasHighlight = this.allDataPoints.filter(x => x.highlight).length > 0;
 
@@ -600,26 +624,26 @@ export class Visual implements IVisual {
         const gapBetweenCharts: number = 10;
 
         this.prepareMainDiv(this.mainElement);
-        this.mainElement.select('.scrollbar-track').remove();      
+        this.mainElement.select('.scrollbar-track').remove();
 
         let legendSize: LegendSize = {
             width: 0,
-            height: 0
+            height: 0,
         };
 
         if (this.isLegendNeeded) {
             legendUtils.renderLegend(this.legend, this.mainDivElement, this.viewport, this.legendProperties);
             legendSize = this.calculateLegendSize(this.settings.legend, this.legendElementRoot);
         } else {
-            this.legendElement && this.legendElement.selectAll("*").remove();
+            this.legendElement && this.legendElement.selectAll('*').remove();
             this.mainDivElement && this.mainDivElement
-                .style("margin-top", 0)
-                .style("margin-bottom", 0)
-                .style("margin-left", 0)
-                .style("margin-right", 0)
+                .style('margin-top', 0)
+                .style('margin-bottom', 0)
+                .style('margin-left', 0)
+                .style('margin-right', 0);
             legendSize = {
                 height: 0,
-                width: 0
+                width: 0,
             };
         }
 
@@ -637,30 +661,30 @@ export class Visual implements IVisual {
 
         const barsSectionSize: ISize = {
             height: chartSize.height - gapBetweenCharts,
-            width: chartSize.width - yAxisSize - gapBetweenCharts * 2
-        }
+            width: chartSize.width - yAxisSize - gapBetweenCharts * 2,
+        };
 
         const xIsScalar: boolean = visualUtils.isScalar(this.metadata.cols.category);
-        const barHeight: number = !xIsScalar || this.settings.categoryAxis.axisType === "categorical" ? visualUtils.calculateDataPointThickness(
+        const barHeight: number = !xIsScalar || this.settings.categoryAxis.axisType === 'categorical' ? visualUtils.calculateDataPointThickness(
             null,
             barsSectionSize,
             uniqueCategories.length,
             this.settings.categoryAxis.innerPadding,
             this.settings,
             !xIsScalar) : 0;
-        
-        const xAxisSizeReverted: number = this.settings.categoryAxis.axisType === "categorical" || !xIsScalar ? this.calculateXAxisSizeForCategorical(uniqueCategories, this.settings, this.metadata, barHeight) : -1;
+
+        const xAxisSizeReverted: number = this.settings.categoryAxis.axisType === 'categorical' || !xIsScalar ? this.calculateXAxisSizeForCategorical(uniqueCategories, this.settings, this.metadata, barHeight) : -1;
         let xAxisSize: number = xAxisSizeReverted > 0 ? xAxisSizeReverted : this.calculateXAxisSize(this.settings);
 
         barsSectionSize.height -= xAxisSize;
 
         this.mainDivElement
-            .style("width", viewport.width - legendSize.width + "px")
-            .style("height", viewport.height - legendSize.height + "px")
-            .style("overflow-x", chartSize.isHorizontalSliderNeeded ? "auto" : "hidden")
-            .style("overflow-y", chartSize.isVerticalSliderNeeded ? "auto" : "hidden");
+            .style('width', viewport.width - legendSize.width + 'px')
+            .style('height', viewport.height - legendSize.height + 'px')
+            .style('overflow-x', chartSize.isHorizontalSliderNeeded ? 'auto' : 'hidden')
+            .style('overflow-y', chartSize.isVerticalSliderNeeded ? 'auto' : 'hidden');
 
-        let maxLabelHeight: number = (chartSize.height) / 100 * this.settings.categoryAxis.maximumSize; 
+        let maxLabelHeight: number = (chartSize.height) / 100 * this.settings.categoryAxis.maximumSize;
         let forceRotaion: boolean = xAxisSizeReverted > 0;
 
         if (this.settings.categoryAxis.maximumSize) {
@@ -671,8 +695,8 @@ export class Visual implements IVisual {
                 forceRotaion = true;
             } else {
                 maxLabelHeight = Number.MAX_VALUE;
-            }    
-        } 
+            }
+        }
 
         let axes: IAxes;
 
@@ -709,25 +733,25 @@ export class Visual implements IVisual {
             isLegendNeeded: this.isLegendNeeded,
             legendData: this.legendProperties.data,
             categoriesCount: null,
-            isSmallMultiple: this.isSmallMultiple()
-        }                       
+            isSmallMultiple: this.isSmallMultiple(),
+        };
 
         let svgHeight: number = 0,
             svgWidth: number = 0;
 
         if (layoutMode === LayoutMode.Matrix) {
             svgHeight = topSpace + rows * chartSize.height + gapBetweenCharts * (rows),
-            svgWidth = leftSpace + columns * chartSize.width + gapBetweenCharts * (columns);
+                svgWidth = leftSpace + columns * chartSize.width + gapBetweenCharts * (columns);
         } else {
             svgHeight = topSpace * rows + rows * chartSize.height + gapBetweenCharts * (rows - 1),
-            svgWidth = leftSpace + columns * chartSize.width + gapBetweenCharts * (columns);
+                svgWidth = leftSpace + columns * chartSize.width + gapBetweenCharts * (columns);
         }
 
         const svgChart = this.mainDivElement
-                .append("svg")
-                .classed("chart", true)
-                .style("width", svgWidth + "px")
-                .style("height", svgHeight + "px");
+            .append('svg')
+            .classed('chart', true)
+            .style('width', svgWidth + 'px')
+            .style('height', svgHeight + 'px');
 
         for (let i = 0; i < uniqueRows.length; ++i) {
             for (let j = 0; j < uniqueColumns.length; ++j) {
@@ -749,30 +773,30 @@ export class Visual implements IVisual {
                 const dataPoints: VisualDataPoint[] = this.allDataPoints.filter(x => x.rowBy === uniqueRows[i]).filter(x => x.columnBy === uniqueColumns[j]);
 
                 const chart = svgChart
-                    .append("g")
+                    .append('g')
                     .attr(
-                        "transform", svg.translate(leftSpace + leftMove, topMove + topSpace)
+                        'transform', svg.translate(leftSpace + leftMove, topMove + topSpace),
                     );
 
-                const xAxisSvgGroup: d3Selection<SVGElement> = chart.append("g");
-                const yAxisSvgGroup: d3Selection<SVGElement> = chart.append("g");
+                const xAxisSvgGroup: d3Selection<SVGElement> = chart.append('g');
+                const yAxisSvgGroup: d3Selection<SVGElement> = chart.append('g');
 
-                const yHasRightPosition: boolean = this.settings.valueAxis.show && this.settings.valueAxis.position === "right";
+                const yHasRightPosition: boolean = this.settings.valueAxis.show && this.settings.valueAxis.position === 'right';
 
                 xAxisSvgGroup.attr(
-                    "transform",
+                    'transform',
                     svg.translate(
-                        marginLeft + 
+                        marginLeft +
                         (yHasRightPosition ? 0 : yAxisSize),
                         barsSectionSize.height));
-    
+
                 yAxisSvgGroup.attr(
-                    "transform",
+                    'transform',
                     svg.translate(
                         marginLeft +
                         (yHasRightPosition ? barsSectionSize.width : yAxisSize),
-                        0));        
-                        
+                        0));
+
                 if (yIsSeparate || xIsSeparate) {
                     if (!dataPoints || !dataPoints.length) {
                         axes = defaultAxes;
@@ -786,34 +810,34 @@ export class Visual implements IVisual {
                         xDomain = dataPoints && dataPoints.length ? RenderAxes.calculateCategoryDomain(dataPoints, this.settings, this.metadata, true) : defaultXDomain;
                     }
 
-                    if (!yIsSeparate && !xIsSeparate ) {
+                    if (!yIsSeparate && !xIsSeparate) {
                         axes = defaultAxes;
                     } else {
                         const uniqueCategoriesCount: number = dataPoints.map(x => x.category).filter((v, i, a) => a.indexOf(v) === i).length;
                         axes = !yIsSeparate && !xIsSeparate ? defaultAxes : this.createSmallMultipleAxesByDomains(xDomain, yDomain, barsSectionSize, maxLabelHeight, uniqueCategoriesCount);
-                    }                       
+                    }
                 }
-    
+
                 if (!this.data.axes) {
                     this.data.axes = defaultAxes;
                 }
 
-                const barHeight: number = !xIsScalar || this.settings.categoryAxis.axisType === "categorical" ? axes.x.scale.rangeBand() : visualUtils.calculateDataPointThickness(
+                const barHeight: number = !xIsScalar || this.settings.categoryAxis.axisType === 'categorical' ? axes.x.scale.bandwidth() : visualUtils.calculateDataPointThickness(
                     dataPoints,
                     barsSectionSize,
                     uniqueCategories.length,
                     this.settings.categoryAxis.innerPadding,
                     this.settings,
-                    !xIsScalar
+                    !xIsScalar,
                 );
 
                 this.renderSmallMultipleAxes(dataPoints, axes, xAxisSvgGroup, yAxisSvgGroup, barHeight);
 
                 if (xIsCustom) {
                     let divider: number = 1;
-                    const xText = xAxisSvgGroup.selectAll("text")[0];
+                    const xText = xAxisSvgGroup.selectAll('text')[0];
 
-                    const axisWidth = (xText.parentNode  as SVGGraphicsElement).getBBox().width;
+                    const axisWidth = (xText.parentNode as SVGGraphicsElement).getBBox().width;
                     const maxTextWidth = visualUtils.getLabelsMaxWidth(xText);
 
                     for (let i = 0; i < xText.length; ++i) {
@@ -826,7 +850,7 @@ export class Visual implements IVisual {
                         }
                     }
 
-                    for (let i = 0; i < xText.length; ++i) { 
+                    for (let i = 0; i < xText.length; ++i) {
                         if (i % divider > 0) {
                             d3.select(xText[i]).remove();
                         }
@@ -835,9 +859,9 @@ export class Visual implements IVisual {
 
                 if (yIsCustom) {
                     let divider: number = 1;
-                    const yText = yAxisSvgGroup.selectAll("text")[0];
+                    const yText = yAxisSvgGroup.selectAll('text')[0];
 
-                    const axisWidth = (yText.parentNode  as SVGGraphicsElement).getBBox().height;
+                    const axisWidth = (yText.parentNode as SVGGraphicsElement).getBBox().height;
                     const maxTextWidth = visualUtils.getLabelsMaxHeight(yText);
 
                     for (let i = 0; i < yText.length; ++i) {
@@ -850,7 +874,7 @@ export class Visual implements IVisual {
                         }
                     }
 
-                    for (let i = 0; i < yText.length; ++i) { 
+                    for (let i = 0; i < yText.length; ++i) {
                         if (i % divider > 0) {
                             d3.select(yText[i]).remove();
                         }
@@ -861,17 +885,17 @@ export class Visual implements IVisual {
                     xAxisSvgGroup,
                     barHeight,
                     this.settings.categoryAxis,
-                    maxLabelHeight
+                    maxLabelHeight,
                 );
-                if ( labelRotationIsNeeded ){
+                if (labelRotationIsNeeded) {
                     RenderAxes.rotateXAxisTickLabels(true, xAxisSvgGroup);
                 }
 
                 const barGroup = chart
-                    .append("g")
-                    .classed("bar-group", true)
+                    .append('g')
+                    .classed('bar-group', true)
                     .attr(
-                        "transform", svg.translate(marginLeft + (yHasRightPosition ? 0 : yAxisSize), 0)
+                        'transform', svg.translate(marginLeft + (yHasRightPosition ? 0 : yAxisSize), 0),
                     );
 
                 // visualUtils.calculateBarCoordianates(dataPoints, axes, this.settings, barHeight);
@@ -880,56 +904,58 @@ export class Visual implements IVisual {
                     hasSelection: boolean = interactivityService.hasSelection();
                 interactivityService.applySelectionStateToData(dataPoints);
 
-                const barSelect = barGroup
+                let barSelect = barGroup
                     .selectAll(Selectors.BarSelect.selectorName)
                     .data(dataPoints);
 
-                barSelect.enter().append("rect")
-                    .attr("class", Selectors.BarSelect.className);
+                const barSelectEnter = barSelect.enter().append('rect')
+                    .attr('class', Selectors.BarSelect.className);
 
                 barSelect.exit()
                     .remove();
-                
+
+                barSelect = barSelect.merge(barSelectEnter);
+
                 barSelect
-                    .attr("height", d => {
+                    .attr('height', d => {
                         return d.barCoordinates.height;
                     })
-                    .attr("width", d => {
+                    .attr('width', d => {
                         return d.barCoordinates.width;
                     })
-                    .attr("x", d => {
+                    .attr('x', d => {
                         return d.barCoordinates.x;
                     })
-                    .attr("y", d => {
+                    .attr('y', d => {
                         return d.barCoordinates.y;
                     })
-                    .attr("fill", d => d.color );
-                
+                    .attr('fill', d => d.color);
+
                 barSelect
-                    .style("fill-opacity", (p: VisualDataPoint) => visualUtils.getFillOpacity(
+                    .style('fill-opacity', (p: VisualDataPoint) => visualUtils.getFillOpacity(
                         p.selected,
                         p.highlight,
                         !p.highlight && hasSelection,
-                        !p.selected && hasHighlight)
+                        !p.selected && hasHighlight),
                     )
-                    .style("stroke", (p: VisualDataPoint)  => {
+                    .style('stroke', (p: VisualDataPoint) => {
                         if (hasSelection && visualUtils.isSelected(p.selected,
                             p.highlight,
                             !p.highlight && hasSelection,
                             !p.selected && hasHighlight)) {
-                                return Visual.DefaultStrokeSelectionColor;
-                            }                        
-    
+                            return Visual.DefaultStrokeSelectionColor;
+                        }
+
                         return p.color;
                     })
-                    .style("stroke-width", p => {
+                    .style('stroke-width', p => {
                         if (hasSelection && visualUtils.isSelected(p.selected,
                             p.highlight,
                             !p.highlight && hasSelection,
                             !p.selected && hasHighlight)) {
                             return Visual.DefaultStrokeSelectionWidth;
                         }
-    
+
                         return Visual.DefaultStrokeWidth;
                     });
 
@@ -941,30 +967,30 @@ export class Visual implements IVisual {
                     this.metadata,
                     chartSize.width,
                     this.isLegendNeeded,
-                    dataPoints
-                );
-
-                const labelGraphicsContext = barGroup
-                        .append("g")
-                        .classed(Selectors.LabelGraphicsContext.className, true);
-
-                RenderVisual.renderDataLabelsForSmallMultiple(
-                    this.data,
-                    this.settings,
-                    labelGraphicsContext,
-                    this.metadata,
-                    dataPoints
+                    dataPoints,
                 );
 
                 const labelBackgroundContext = barGroup
-                    .append("g")
+                    .append('g')
                     .classed(Selectors.LabelBackgroundContext.className, true);
 
                 RenderVisual.renderDataLabelsBackgroundForSmallMultiple(
                     this.data,
                     this.settings,
                     labelBackgroundContext,
-                    dataPoints
+                    dataPoints,
+                );
+
+                const labelGraphicsContext = barGroup
+                    .append('g')
+                    .classed(Selectors.LabelGraphicsContext.className, true);
+
+                RenderVisual.renderDataLabelsForSmallMultiple(
+                    this.data,
+                    this.settings,
+                    labelGraphicsContext,
+                    this.metadata,
+                    dataPoints,
                 );
 
                 if (this.settings.smallMultiple.showChartTitle && layoutMode === LayoutMode.Flow) {
@@ -977,16 +1003,16 @@ export class Visual implements IVisual {
                         topSpace: topMove,
                         textHeight: topSpace,
                         rows: uniqueRows,
-                        xAxisLabelSize: xAxisSize
+                        xAxisLabelSize: xAxisSize,
                     }, this.settings.smallMultiple);
                 }
 
                 if (this.settings.valueAxis.show) {
-                    const xWidth: number = (<Element>yAxisSvgGroup.selectAll("line").node()).getBoundingClientRect().width;
+                    const xWidth: number = (<Element>yAxisSvgGroup.selectAll('line').node()).getBoundingClientRect().width;
                     if (axes.y.dataDomain[0] <= this.settings.constantLine.value && this.settings.constantLine.value <= axes.y.dataDomain[1]) {
                         RenderVisual.renderConstantLine(this.settings.constantLine, barGroup, axes, xWidth);
                     }
-                }                    
+                }
             }
         }
 
@@ -999,9 +1025,9 @@ export class Visual implements IVisual {
                 leftSpace: leftSpace,
                 topSpace: topSpace,
                 xAxisLabelSize: xAxisSize,
-                rowsInFlow: rowsInFlow
+                rowsInFlow: rowsInFlow,
             }, this.settings.smallMultiple);
-        }            
+        }
 
         if (this.settings.smallMultiple.showChartTitle) {
             RenderVisual.renderSmallMultipleTitles({
@@ -1012,9 +1038,9 @@ export class Visual implements IVisual {
                 topSpace: topSpace,
                 rows: uniqueRows,
                 xAxisLabelSize: xAxisSize,
-                rowsInFlow: rowsInFlow
+                rowsInFlow: rowsInFlow,
             }, this.settings.smallMultiple);
-        }            
+        }
 
         const legendBucketFilled: boolean = !!(this.dataView.categorical && this.dataView.categorical.values && this.dataView.categorical.values.source);
         this.lassoSelection.disable();
@@ -1026,12 +1052,12 @@ export class Visual implements IVisual {
 
             const behaviorOptions: WebBehaviorOptions = {
                 bars: this.mainElement.selectAll(Selectors.BarSelect.selectorName),
-                clearCatcher: d3.select( document.createElement('div') ),
+                clearCatcher: d3.select(document.createElement('div')),
                 interactivityService: this.interactivityService,
                 host: this.host,
                 selectionSaveSettings: this.settings.selectionSaveSettings,
                 behavior: this.behavior,
-                dataPoints: this.allDataPoints
+                dataPoints: this.allDataPoints,
             };
 
             this.interactivityService.bind(behaviorOptions);
@@ -1079,14 +1105,14 @@ export class Visual implements IVisual {
             previousCategoryName = categoryName;
             categoryName = this.allDataPoints[i].category.toString();
 
-            if ( i > 0 && categoryName !== previousCategoryName ) {
+            if (i > 0 && categoryName !== previousCategoryName) {
                 categoryIndex++;
             }
 
-            if ( !dataPointsByCategories[categoryIndex] ) {
+            if (!dataPointsByCategories[categoryIndex]) {
                 const category: CategoryDataPoints = {
                     categoryName,
-                    dataPoints: []
+                    dataPoints: [],
                 };
                 dataPointsByCategories[categoryIndex] = category;
             }
@@ -1108,7 +1134,7 @@ export class Visual implements IVisual {
             legendData: legendData,
             hasHighlight: this.hasHighlight,
             isLegendNeeded: this.isLegendNeeded,
-            isSmallMultiple: this.isSmallMultiple()
+            isSmallMultiple: this.isSmallMultiple(),
         };
 
         // render for calculate width of labels text
@@ -1125,12 +1151,12 @@ export class Visual implements IVisual {
         this.data.axes = axes;
         this.interactivityService.applySelectionStateToData(this.data.dataPoints);
 
-    /*    // calculate again after yScale changing
-        this.calculateBarHeight();
+        /*    // calculate again after yScale changing
+            this.calculateBarHeight();
 
-        // calculate again after BarHeight changing
-        axes = this.createAxes(visibleDataPoints);
-        this.data.axes = axes;*/
+            // calculate again after BarHeight changing
+            axes = this.createAxes(visibleDataPoints);
+            this.data.axes = axes;*/
 
         this.renderAxes();
         RenderAxes.rotateXAxisTickLabels(this.isNeedToRotate, this.xAxisSvgGroup);
@@ -1148,7 +1174,7 @@ export class Visual implements IVisual {
         const categoryType = axis.getCategoryValueType(this.metadata.cols.category),
             isOrdinal: boolean = axis.isOrdinal(categoryType);
 
-        return this.settings.categoryAxis.axisType === "continuous" && !isOrdinal ? ScrollbarState.Disable : ScrollbarState.Enable;
+        return this.settings.categoryAxis.axisType === 'continuous' && !isOrdinal ? ScrollbarState.Disable : ScrollbarState.Enable;
     }
 
     private createAxes(dataPoints, isSmallMultiple = false): IAxes {
@@ -1161,7 +1187,8 @@ export class Visual implements IVisual {
             this.settings,
             this.host,
             isSmallMultiple,
-            this.dataPointThickness
+            this.dataPointThickness,
+            this.maxXLabelsWidth,
         );
 
         return axes;
@@ -1173,7 +1200,7 @@ export class Visual implements IVisual {
             this.visualSize,
             this.data.categoriesCount,
             this.settings.categoryAxis.innerPadding,
-            this.settings
+            this.settings,
         );
     }
 
@@ -1186,7 +1213,7 @@ export class Visual implements IVisual {
             this.settings,
             this.xAxisSvgGroup,
             this.yAxisSvgGroup,
-            this.data.axes
+            this.data.axes,
         );
     }
 
@@ -1202,7 +1229,7 @@ export class Visual implements IVisual {
             this.axisLabelsGroup,
             this.axisGraphicsContext);
 
-            visualUtils.calculateBarCoordianates(this.data.dataPoints, this.data.axes, this.settings, this.dataPointThickness);
+        visualUtils.calculateBarCoordianates(this.data.dataPoints, this.data.axes, this.settings, this.dataPointThickness);
         // render main visual
         RenderVisual.render(
             this.data,
@@ -1213,7 +1240,7 @@ export class Visual implements IVisual {
             this.tooltipServiceWrapper,
             this.host,
             this.hasHighlight,
-            this.settings
+            this.settings,
         );
 
         const chartHeight: number = (<Element>this.barGroup.node()).getBoundingClientRect().height;
@@ -1223,7 +1250,7 @@ export class Visual implements IVisual {
             this.settings.categoryLabels,
             this.metadata,
             chartHeight,
-            this.isLegendNeeded
+            this.isLegendNeeded,
         );
 
         const filteredDataLabels: VisualDataPoint[] = RenderVisual.filterData(this.data.dataPoints);
@@ -1231,45 +1258,49 @@ export class Visual implements IVisual {
         RenderVisual.renderDataLabelsBackground(
             filteredDataLabels,
             this.settings,
-            this.labelBackgroundContext
+            this.labelBackgroundContext,
         );
 
         const dataLabelFormatter: IValueFormatter =
             formattingUtils.createFormatter(this.settings.categoryLabels.displayUnits,
-                                                this.settings.categoryLabels.precision,
-                                                this.metadata.cols.value,
-                                                getValueForFormatter(this.data));
+                this.settings.categoryLabels.precision,
+                this.metadata.cols.value,
+                getValueForFormatter(this.data));
 
         RenderVisual.renderDataLabels(
             filteredDataLabels,
             dataLabelFormatter,
             this.settings,
-            this.labelGraphicsContext
+            this.labelGraphicsContext,
         );
 
-        const xWidth: number = (<Element>this.yAxisSvgGroup.selectAll("line").node()).getBoundingClientRect().width;
+        const xWidth: number = (<Element>this.yAxisSvgGroup.selectAll('line').node()).getBoundingClientRect().width;
         RenderVisual.renderConstantLine(this.settings.constantLine, this.barGroup, this.data.axes, xWidth);
     }
 
     private calculateLegendSize(settings: legendSettings, legendElementRoot: d3Selection<SVGElement>): LegendSize {
         // if 'width' or 'height' is '0' it means that we don't need that measure for our calculations
         switch (settings.position) {
-            case 'Top': case 'TopCenter':
-            case 'Bottom': case 'BottomCenter':
+            case 'Top':
+            case 'TopCenter':
+            case 'Bottom':
+            case 'BottomCenter':
                 return {
                     width: 0,
-                    height: (legendElementRoot.node() as SVGGraphicsElement).getBBox().height
+                    height: (legendElementRoot.node() as SVGGraphicsElement).getBBox().height,
                 };
-            case 'Left': case 'LeftCenter':
-            case 'Right': case 'RightCenter':
+            case 'Left':
+            case 'LeftCenter':
+            case 'Right':
+            case 'RightCenter':
                 return {
                     width: (legendElementRoot.node() as SVGGraphicsElement).getBBox().width,
-                    height: 0
+                    height: 0,
                 };
             default:
                 return {
                     width: 0,
-                    height: 0
+                    height: 0,
                 };
         }
     }
@@ -1299,7 +1330,7 @@ export class Visual implements IVisual {
             }
         }
 
-        if (this.isSmallMultiple() && (!visualUtils.categoryIsScalar(this.metadata) || this.settings.categoryAxis.axisType === "categorical")) {
+        if (this.isSmallMultiple() && (!visualUtils.categoryIsScalar(this.metadata) || this.settings.categoryAxis.axisType === 'categorical')) {
             settings.categoryAxis.rangeType = settings.categoryAxis.rangeTypeNoScalar;
         }
 
@@ -1332,34 +1363,34 @@ export class Visual implements IVisual {
             categoryAxis.axisTitle = '';
         }
 
-        if (typeof settings.selectionSaveSettings.selection === "string") {
+        if (typeof settings.selectionSaveSettings.selection === 'string') {
             settings.selectionSaveSettings.selection = JSON.parse(settings.selectionSaveSettings.selection);
         }
     }
 
     private calculateOffsets() {
-        const xtickText = this.xAxisSvgGroup.selectAll("text");
-        const ytickText = this.yAxisSvgGroup.selectAll("text");
+        const xtickText = this.xAxisSvgGroup.selectAll('text');
+        const ytickText = this.yAxisSvgGroup.selectAll('text');
 
         const showXAxisTitle: boolean = this.settings.categoryAxis.show && this.settings.categoryAxis.showTitle;
         const showYAxisTitle: boolean = this.settings.valueAxis.show && this.settings.valueAxis.showTitle;
 
         this.yTickOffset = visualUtils.getLabelsMaxWidth(ytickText) + (showYAxisTitle
-                                        ? PixelConverter.fromPointToPixel(this.settings.valueAxis.titleFontSize)
-                                        : 0);
+            ? PixelConverter.fromPointToPixel(this.settings.valueAxis.titleFontSize)
+            : 0);
 
         const xAxisMaxLableWidth: number = visualUtils.getLabelsMaxWidth(xtickText);
         const innerPadding: number = this.data && this.data.axes ? this.data.axes.x.axis.tickPadding() : 0;
 
         let isReverted: boolean = false;
 
-        if (this.data && (!this.data.axes.xIsScalar || this.settings.categoryAxis.axisType !== "continuous")) {
-            isReverted = !!this.maxXLabelsWidth || xAxisMaxLableWidth > (this.data.axes.x.scale.rangeBand ? this.data.axes.x.scale.bandwidth() : 0 + innerPadding);
+        if (this.data && (!this.data.axes.xIsScalar || this.settings.categoryAxis.axisType !== 'continuous')) {
+            isReverted = !!this.maxXLabelsWidth || xAxisMaxLableWidth > (this.data.axes.x.scale.bandwidth ? this.data.axes.x.scale.bandwidth() : 0 + innerPadding);
         }
 
         const titleSize: number = (showXAxisTitle
-                                    ? PixelConverter.fromPointToPixel(this.settings.categoryAxis.titleFontSize) + 5
-                                    : 0);
+            ? PixelConverter.fromPointToPixel(this.settings.categoryAxis.titleFontSize) + 5
+            : 0);
 
         this.xTickOffset = (isReverted ? xAxisMaxLableWidth : visualUtils.getLabelsMaxHeight(xtickText)) + titleSize;
         this.isNeedToRotate = isReverted;
@@ -1369,8 +1400,8 @@ export class Visual implements IVisual {
         // Update the size of our SVG element
         if (this.mainSvgElement) {
             this.mainSvgElement
-                .attr("width", this.viewport.width)
-                .attr("height", this.viewport.height);
+                .attr('width', this.viewport.width)
+                .attr('height', this.viewport.height);
         }
 
         this.calculateVisualMargin();
@@ -1378,7 +1409,7 @@ export class Visual implements IVisual {
         const showXAxisTitle: boolean = this.settings.categoryAxis.show && this.settings.categoryAxis.showTitle;
         const yAxisTitleThickness: number = showXAxisTitle ? visualUtils.GetXAxisTitleHeight(this.settings.categoryAxis) + 5 : 0;
 
-        this.calculateVisualSize( legendSize, yAxisTitleThickness);
+        this.calculateVisualSize(legendSize, yAxisTitleThickness);
 
         const xAxisMaxWidth = axisUtils.getXAxisMaxWidth(this.visualSize.height + this.xTickOffset, this.settings);
 
@@ -1392,12 +1423,12 @@ export class Visual implements IVisual {
     }
 
     private calculateVisualMargin(): void {
-        const yHasRightPosition: boolean = this.settings.valueAxis.show && this.settings.valueAxis.position === "right";
+        const yHasRightPosition: boolean = this.settings.valueAxis.show && this.settings.valueAxis.position === 'right';
         const extendedLeftMargin: boolean = yHasRightPosition || !this.settings.categoryAxis.show;
         const extendedRightMargin: boolean = !yHasRightPosition || !this.settings.categoryAxis.show;
 
         // Set up margins for our visual
-        this.visualMargin = { top: 5, bottom: 5, left: extendedLeftMargin ? 15 : 5 , right: extendedRightMargin ? 15 : 5  };
+        this.visualMargin = {top: 5, bottom: 5, left: extendedLeftMargin ? 15 : 5, right: extendedRightMargin ? 15 : 5};
     }
 
     private calculateVisualSize(legendSize: LegendSize, xAxisTitleThickness: number): void {
@@ -1431,52 +1462,52 @@ export class Visual implements IVisual {
     private calculateVisualPosition(): void {
         // Translate the SVG group to account for visual's margins
         this.chartsContainer.attr(
-            "transform",
+            'transform',
             `translate(${this.visualMargin.left}, ${this.visualMargin.top})`);
 
         // Move SVG group elements to appropriate positions.
         this.visualTranslation = {
             x: this.visualMargin.left,// + (yHasRightPosition ? 0 : axesSize.yAxisWidth + this.yTickOffset),
-            y: this.visualMargin.top
+            y: this.visualMargin.top,
         };
 
-        const yHasLeftPosition: boolean = this.settings.valueAxis.show && this.settings.valueAxis.position === "left";
+        const yHasLeftPosition: boolean = this.settings.valueAxis.show && this.settings.valueAxis.position === 'left';
 
         const translateX: number = yHasLeftPosition ? this.axesSize.yAxisWidth + this.yTickOffset : 0;
-            
+
         this.xAxisSvgGroup.attr(
-            "transform",
+            'transform',
             svg.translate(
                 translateX,
                 this.visualMargin.top + this.visualSize.height));
 
         this.yAxisSvgGroup.attr(
-            "transform",
+            'transform',
             svg.translate(
                 (yHasLeftPosition ? this.axesSize.yAxisWidth + this.yTickOffset : this.visualSize.width),
                 this.visualMargin.top));
 
         this.barGroup.attr(
-            "transform",
+            'transform',
             svg.translate(
                 translateX,
                 this.visualMargin.top));
 
         this.labelGraphicsContext.attr(
-            "transform",
+            'transform',
             svg.translate(
                 translateX,
                 this.visualMargin.top));
 
         this.labelBackgroundContext.attr(
-            "transform",
+            'transform',
             svg.translate(
                 translateX,
                 this.visualMargin.top));
     }
 
     private yAxisHasRightPosition(): boolean {
-        return this.settings.valueAxis.show && this.settings.valueAxis.position === "right";
+        return this.settings.valueAxis.show && this.settings.valueAxis.position === 'right';
     }
 
     private static parseSettings(dataView: DataView): VisualSettings {
@@ -1494,11 +1525,11 @@ export class Visual implements IVisual {
         const instances: VisualObjectInstance[] = (instanceEnumeration as VisualObjectInstanceEnumerationObject).instances;
         const instance: VisualObjectInstance = instances[0];
 
-        if (instance.objectName === "legend" && !this.isLegendNeeded) {
+        if (instance.objectName === 'legend' && !this.isLegendNeeded) {
             return null;
         }
 
-        if (instance.objectName === "smallMultiple" && !this.isSmallMultiple()) {
+        if (instance.objectName === 'smallMultiple' && !this.isSmallMultiple()) {
             return null;
         }
 
