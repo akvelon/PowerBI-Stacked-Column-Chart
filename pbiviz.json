@@ -2,9 +2,9 @@
   "visual": {
     "name": "stackedColumnChartByAkvelon",
     "guid": "stackedColumnChartByAkvelonCC88FD95630A41AC8562F09033A48946",
-    "displayName": "Stacked Column Chart by Akvelon 2.0.0",
+    "displayName": "Stacked Column Chart by Akvelon 2.0.1",
     "visualClassName": "Visual",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "description": "Stacked Column Chart with rectangle selection support",
     "supportUrl": "http://akvelon.com/feedback",
     "gitHubUrl": ""
