@@ -55,7 +55,6 @@ import {
 import * as visualUtils from './../utils';
 
 import {Visual} from '../visual';
-import {WebBehaviorOptions} from '../behavior';
 import {DataLabelHelper} from '../utils/dataLabelHelper';
 import {getValueForFormatter} from '../utils/formattingUtils';
 import * as formattingUtils from '../utils/formattingUtils';
@@ -72,13 +71,9 @@ export class RenderVisual {
     public static render(
         data: VisualData,
         visualSvgGroup: d3Selection<SVGElement>,
-        clearCatcher: d3Selection<any>,
         visualInteractivityService: IInteractivityService<any>,
-        visualBehavior: IInteractiveBehavior,
         tooltipServiceWrapper: ITooltipServiceWrapper,
-        host: IVisualHost,
-        hasHighlight: boolean,
-        settings: VisualSettings) {
+        hasHighlight: boolean) {
         // Select all bar groups in our chart and bind them to our categories.
         // Each group will contain a set of bars, one for each of the values in category.
         let barGroupSelect = visualSvgGroup.selectAll(Selectors.BarGroupSelect.selectorName)
@@ -157,23 +152,12 @@ export class RenderVisual {
                 return Visual.DefaultStrokeWidth;
             });
 
-        if (interactivityService) {
-            interactivityService.applySelectionStateToData(data.dataPoints);
-
-            const behaviorOptions: WebBehaviorOptions = {
-                bars: barSelect,
-                clearCatcher: clearCatcher,
-                interactivityService: visualInteractivityService,
-                host: host,
-                selectionSaveSettings: settings.selectionSaveSettings,
-                dataPoints: data.dataPoints,
-                behavior: visualBehavior,
-            };
-
-            interactivityService.bind(behaviorOptions);
-        }
 
         this.renderTooltip(barSelect, tooltipServiceWrapper);
+
+        return {
+            barSelect
+        };
     }
 
     public static renderDataLabelsBackground(

@@ -154,7 +154,6 @@ export class Visual implements IVisual {
     public xTickOffset: number;
     public isNeedToRotate: boolean;
 
-    private behavior: IInteractiveBehavior;
     private interactivityService: IInteractivityService<any>;
 
     private clearCatcher: d3Selection<any>;
@@ -208,8 +207,6 @@ export class Visual implements IVisual {
             null,
             customLegendBehavior,
         );
-
-        this.behavior = new WebBehavior(this);
 
         this.legendElementRoot = this.mainElement.selectAll('svg.legend');
         this.legendElement = this.mainElement.selectAll('svg.legend').selectAll('g');
@@ -409,6 +406,17 @@ export class Visual implements IVisual {
         } else {
             this.normalChartProcess(options);
         }
+
+        const clearCatcher = d3.select(this.mainHtmlElement);
+        clearCatcher
+            .on('contextmenu', (e: MouseEvent) => {
+                this.webBehaviorSelectionHandler.handleContextMenu(null, {
+                    x: e.clientX,
+                    y: e.clientY
+                });
+                e.preventDefault();
+                e.stopPropagation();
+            });
 
         if (!this.isSelectionRestored) {
             this.restoreSelection();
@@ -1052,15 +1060,31 @@ export class Visual implements IVisual {
 
             const behaviorOptions: WebBehaviorOptions = {
                 bars: this.mainElement.selectAll(Selectors.BarSelect.selectorName),
-                clearCatcher: d3.select(document.createElement('div')),
+                clearCatcher: d3.select(this.mainHtmlElement),
                 interactivityService: this.interactivityService,
                 host: this.host,
                 selectionSaveSettings: this.settings.selectionSaveSettings,
-                behavior: this.behavior,
+                behavior: new WebBehavior(this),
                 dataPoints: this.allDataPoints,
             };
 
             this.interactivityService.bind(behaviorOptions);
+
+            const clearCatcher = d3.select(this.mainHtmlElement);
+            debugger;
+            clearCatcher
+            .on("click", () => {
+                this.webBehaviorSelectionHandler.handleClearSelection();
+            })
+            .on('contextmenu', (e: MouseEvent) => {
+                debugger;
+                this.webBehaviorSelectionHandler.handleContextMenu(null, {
+                    x: e.clientX,
+                    y: e.clientY
+                });
+                e.preventDefault();
+                e.stopPropagation();
+            });
         }
     }
 
@@ -1231,17 +1255,29 @@ export class Visual implements IVisual {
 
         visualUtils.calculateBarCoordianates(this.data.dataPoints, this.data.axes, this.settings, this.dataPointThickness);
         // render main visual
-        RenderVisual.render(
+        const { barSelect } = RenderVisual.render(
             this.data,
             this.barGroup,
-            this.clearCatcher,
             this.interactivityService,
-            this.behavior,
             this.tooltipServiceWrapper,
-            this.host,
             this.hasHighlight,
-            this.settings,
         );
+
+        if (this.interactivityService) {
+            this.interactivityService.applySelectionStateToData(this.data.dataPoints);
+
+            const behaviorOptions: WebBehaviorOptions = {
+                bars: barSelect,
+                clearCatcher: this.clearCatcher,
+                interactivityService: this.interactivityService,
+                host: this.host,
+                selectionSaveSettings: this.settings.selectionSaveSettings,
+                dataPoints: this.data.dataPoints,
+                behavior: new WebBehavior(this)
+            };
+
+            this.interactivityService.bind(behaviorOptions);
+        }
 
         const chartHeight: number = (<Element>this.barGroup.node()).getBoundingClientRect().height;
 
